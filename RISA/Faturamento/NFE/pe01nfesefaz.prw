@@ -158,6 +158,28 @@ If aNota[4] == "1"	// Notas de Saida
 			Endif
 		Endif
 	Endif
+// Dados da Venda Balcao
+	If SF2->F2_PREFORI == "BAL"
+		cMensCli += "Venda Balcao" + " "
+		cMensCli += "Vendedor: " + Alltrim( POSICIONE("SA3",1,xFILIAL("SA3") + SF2->F2_VEND1,"A3_NREDUZ") ) + " "
+// Dados da Venda da Oficina
+	ElseIf SF2->F2_PREFORI == "OFI"
+		DbSelectArea("VOO")
+		DbSetOrder(4)
+		If DbSeek( xFILIAL("VOO") + SF2->F2_DOC + SF2->F2_SERIE )
+			cMensCli += "Venda Oficina" + " "
+			cMensCli += "Numero da O.S:" + VOO->VOO_NUMOSV + " "
+			cMensCli += "Vendedor: " + Alltrim( POSICIONE("SA3",1,xFILIAL("SA3") + SF2->F2_VEND1,"A3_NREDUZ") ) + " "
+		Endif
+	Endif
+/*
+// Dados do Motorista
+	DbSelectArea("SZF")
+	If DbSeek( xFilial("SZF") + SZF->ZF_NFISCAL + SZF->ZF_SERIE )
+		cMensCli += "Motorista: " + Alltrim( POSICIONE("SA3",1,xFILIAL("SA3") + SF2->F2_VEND1,"A3_NREDUZ") ) + " "
+		cMensCli += "R.G. Motor.: " + Alltrim( POSICIONE("SA3",1,xFILIAL("SA3") + SF2->F2_VEND1,"A3_RG") ) + " "
+	Endif
+*/
 Else	// Notas de Entrada
 //Verifica se é Nota de Veiculo SIGAVEI
 // COMECA AQUI
