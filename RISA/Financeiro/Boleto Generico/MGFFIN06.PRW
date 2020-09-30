@@ -25,8 +25,8 @@
 /*/
 
 User Function MULTIBOL(lDanfe,lEmail,lTitulo)
+
 	Local 	aMV		  	:= {}
-	Local 	aParam		:= {}
 	Local 	aRet		:= {}
 	Local 	nXi			:= 0
 	Local   aBcoPad		:= StrToKarr( Alltrim( SuperGetMV("FS_BCOPAD",.T.,"SUB;BCO;AGE;CTA") ), ";" )
@@ -43,7 +43,14 @@ User Function MULTIBOL(lDanfe,lEmail,lTitulo)
 	Default lDanfe 		:= .f.
 	Default lEmail		:= .f.
 	Default lTitulo		:= .f.
+	Default aParam 		:= {}
 	
+	aParam 		:= if(aParam = NIL,.F.,aParam) //chamada pelo DANFE
+
+	If !Empty(aParam)
+		lDanfe := aParam[1] //Veio pelo impressão da DANFEII
+	EndIf
+
 	aadd(aMV,MV_PAR01)
 	aadd(aMV,MV_PAR02)
 	aadd(aMV,MV_PAR03)
@@ -111,6 +118,15 @@ User Function MULTIBOL(lDanfe,lEmail,lTitulo)
 
 	If lDanfe
 	
+		If !Empty(aParam)
+			lDanfe := aParam[1] //Veio pelo impressão da DANFEII
+		EndIf
+
+
+		DbSelectArea("SF2")
+		DbSetOrder(1) //F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA
+		DbSeek(xFilial("SF2")+aParam[1]+aParam[3])
+
 		dbSelectArea("SA1")
 		dbSetOrder(1)
 		dbSeek(xFilial("SA1")+SF2->F2_CLIENTE+SF2->F2_LOJA)

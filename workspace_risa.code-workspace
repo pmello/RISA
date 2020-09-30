@@ -5,6 +5,8 @@
 		}
 	],
 	"settings": {
-		"totvsLanguageServer.welcomePage": false
+		"totvsLanguageServer.welcomePage": false,
+		"totvsLanguageServer.editor.toggle.autocomplete": "Basic",
+		"totvsLanguageServer.askCompileResult": true
 	}
 }

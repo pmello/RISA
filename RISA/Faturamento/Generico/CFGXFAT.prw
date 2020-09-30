@@ -719,10 +719,6 @@ If Type("l410Auto") == "U" .OR. l410Auto     // Ignora se não identificar a orig
     Return    
 Endif
 
-If Alltrim(M->C5_XOPER) $ GetMV('FS_REGRAGA',,"01/02/04")
-    Return    
-Endif
-
 For nLinha := 1 TO Len(aCols) //Vare os itens do Pedido para saber se deve bloquear por Regra de Desconto (gatilho preenche o campo C6_XBLQ)
     nTotal += aCols[nLinha,nPosTOT]
     If aCols[nLinha,nPosXBLQ] == "1"
@@ -908,7 +904,7 @@ User Function CFGXBLOQ()
 
 If SC5->C5_BLQ == "Y" //Bloqueado em Garantia
     MsgStop("Pedido Bloqueado em Garantia")
-ElseIf SC5->C5_BLQ == "Y" //Bloqueado Regras de Preços e Descontos
+ElseIf SC5->C5_BLQ == "X" //Bloqueado Regras de Preços e Descontos
     MsgStop("Pedido Bloqueado por Regras de Preços e Descontos")
 Else
     Ma410PvNfs()
@@ -966,3 +962,53 @@ IF SF2->F2_TIPO == 'N' .AND. SB1->B1_GRUPO $ GETMV("MV_COMBUS")
 Endif
 
 Return
+
+//Grava informações do motorista na SF2 para impressão em DANFE atraves do PE da Nota
+//Ponto de entrada SF2460I
+//Conteudo usado em PE01NFESEFAZ
+//Ajustado Emerson Natali
+User Function GRVMOTORIS()
+
+Local cTitulo   := "Dados do Motorista"
+
+Private cMotor  := Space( TamSX3("DA4_COD")[1] )   // Código do Motorista
+Private cNmMotor:= Space( TamSX3("DA4_NOME")[1] )  // Nome do Veículo
+
+DEFINE MSDIALOG oDlg TITLE cTitulo  OF oMainWnd PIXEL FROM 040,040 TO 430,1200
+
+@ 066, 009 SAY   oSay3    PROMPT "Motorista"      SIZE 043, 007 PIXEL OF oDlg FONT oBold COLORS 0, 12632256
+@ 064, 040 MSGET oMotor   VAR    cMotor           SIZE 043, 010 PIXEL OF oDlg When .T.   F3 "DA4" VALID ValMotor( cMotor )
+@ 064, 100 MSGET oNMMtor  VAR    cNMMotor         SIZE 080, 010 PIXEL OF oDlg When .F.
+
+@ 179, 531 BUTTON oButton1 PROMPT "Confirma"      SIZE 037, 012 OF oDlg ACTION (GravaMot(),oDlg:End()) PIXEL
+
+ACTIVATE MSDIALOG oDlg  CENTERED
+
+Return
+
+//Rotina para gravar os dados na Tabela SF2
+//essas informações serão usadas na impressão da DANFE atraves do PE - PE01NFESEFAZ
+Static Function GravaMot
+
+/*
+If RecLock("SF2",.F.)
+    SF2->F2_XCODMOT     := cMotor
+    SF2->F2_XNOMMOT     := cNMMotor
+    SF2->()MsUnLock()
+EndIf
+*/
+
+Return
+
+// Valida Codigo do motorista
+Static Function ValMotor( _cCodigo )
+Local lRet := .F.
+
+DbSelectArea("DA4")
+DbSetOrder(1)
+If DbSeek( xFILIAL("DA4") + _cCodigo )
+    cNmMotor := DA4->DA4_NOME  // Nome do Motorista
+    lRet     := .T.
+Endif
+
+Return( lRet )

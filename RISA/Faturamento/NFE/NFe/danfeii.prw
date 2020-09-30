@@ -171,6 +171,14 @@ If lIsLoja
 Else
 	FreeObj(oDANFE)
 	oDANFE := Nil
+
+	If MsgYesNo("Deseja imprimir o Boleto Bancário ?","Boleto")
+		If ExistBlock("MULTIBOL")
+			aParam := {.T., mv_par01, mv_par02, mv_par03} // parametro .t. DANFE no multibol e Nota de - ate e serie 
+    		ExecBlock( "MULTIBOL", .F., .F.,aParam) //Impressão do Boleto 
+		Endif
+	EndIF
+
 EndIf
 
 RestArea(aArea)
