@@ -125,7 +125,7 @@ User Function MULTIBOL(lDanfe,lEmail,lTitulo)
 
 		DbSelectArea("SF2")
 		DbSetOrder(1) //F2_FILIAL+F2_DOC+F2_SERIE+F2_CLIENTE+F2_LOJA
-		DbSeek(xFilial("SF2")+aParam[1]+aParam[3])
+		DbSeek(xFilial("SF2")+aParam[2]+aParam[4])
 
 		dbSelectArea("SA1")
 		dbSetOrder(1)
@@ -167,8 +167,8 @@ User Function MULTIBOL(lDanfe,lEmail,lTitulo)
 		MV_PAR17	:= SPACE(6)				//Do Bordero
 		MV_PAR18	:= "ZZZZZZ"				//Ate Bordero
 		MV_PAR19	:= aBcoPad[1] //SubConta
-		MV_PAR20	:= aBcoPad[2] //Banco 
-		MV_PAR21	:= aBcoPad[3] //Agencia 
+		MV_PAR20	:= aBcoPad[2] //Banco
+		MV_PAR21	:= aBcoPad[3] //Agencia
 		MV_PAR22	:= aBcoPad[4] //Conta
 	ElseIf lTitulo	
 	
@@ -213,7 +213,6 @@ User Function MULTIBOL(lDanfe,lEmail,lTitulo)
 		MV_PAR16	:= SE1->E1_VENCREA+5000	//Ate Vencimento
 		MV_PAR17	:= SPACE(6)				//Do Bordero
 		MV_PAR18	:= "ZZZZZZ"				//Ate Bordero	
-
 		MV_PAR19	:= iif(Empty(aMV[19]),cSubCta,aMV[19]) //SubConta
 		MV_PAR20	:= SE1->E1_PORTADO //Banco 
 		MV_PAR21	:= SE1->E1_AGEDEP //Agencia 

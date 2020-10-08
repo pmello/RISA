@@ -57,6 +57,7 @@ Local aArea     := GetArea()
 Local lExistNfe := .F.
 Local lRet		:= .T.
 
+Default lBolDanfe := .F. //Chama função que perguta se imprime boleto sim ou não.
 Default lIsLoja	:= .F.	// indica se foi chamado de alguma rotina do SIGALOJA
 
 default lAutomato := .F.
@@ -111,8 +112,19 @@ EndIf
 If lIsLoja
 	lRet := lExistNFe
 Else
+	lBolDanfe := lExistNFe
 	FreeObj(oDANFE)
 	oDANFE := Nil
+
+	If lBolDanfe
+		If ExistBlock("MULTIBOL") //Verifica a existencia do programa compilado. Fonte MGFFIN06.PRW
+			If MsgYesNo("Deseja imprimir o Boleto Bancário ?","Boleto")
+				aParam := {.T., mv_par01, mv_par02, mv_par03} // parametro .t. DANFE no multibol e Nota de - ate e serie 
+				ExecBlock( "MULTIBOL", .F., .F.,aParam) //Impressão do Boleto 
+			Endif
+		EndIF
+	EndIf
+
 EndIf
 
 RestArea(aArea)

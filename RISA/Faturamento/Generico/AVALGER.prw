@@ -46,8 +46,10 @@ If VerSenha(136) .And. VerSenha(137)
 	dbSetOrder(1)
     If __cUserId $ GetMV('FS_GERMAST',,"000000")
 		cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_BLQ == 'X' "
+		//cCondicao := ""
 	Else
 		cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_BLQ == 'X' .And. C5_VEND1 $ " + U_PEGAVEN()
+		//cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_VEND1 $ " + U_PEGAVEN()
 	Endif
  	//旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커
 	//� Endereca a funcao de BROWSE                                  �
@@ -225,11 +227,13 @@ TGroup():New(029,008,91,571,,oDlgMain,,,.T.)
 @ 015, 462 MSGET oValTot VAR    cValTot					 SIZE 110, 010 PIXEL OF oDlgMain When .F.   COLORS 0, 16777215
 @ 100, 012 SAY   oSay7   PROMPT "JUSTIFICATIVA"          SIZE 045, 007 PIXEL OF oDlgMain FONT oBold COLORS 0, 12632256 
 @ 108, 008 GET   oJust   VAR    cJust                    SIZE 560, 066 PIXEL OF oDlgMain MULTILINE  COLORS 0, 16777215 HSCROLL 
-@ 096, 385 SAY   oSay10  PROMPT "Legenda:"               SIZE 025, 007 PIXEL OF oDlgMain FONT oBold COLORS 0, 12632256 
-@ 094, 414 MSGET oRed1   VAR    oRed                     SIZE 015, 010 PIXEL OF oDlgMain READONLY   COLORS 0, 12632256  
-@ 095, 432 SAY   oSay8   PROMPT "Com Bloqueio Comercial" SIZE 062, 007 PIXEL OF oDlgMain FONT oBold COLORS 0, 12632256 
-@ 094, 494 MSGET oBlue1  VAR    oBlue                    SIZE 015, 010 PIXEL OF oDlgMain READONLY   COLORS 0, 12632256  
-@ 095, 512 SAY   oSay9   PROMPT "Sem Bloqueio Comercial" SIZE 059, 007 PIXEL OF oDlgMain FONT oBold COLORS 0, 12632256 
+@ 096, 285 SAY   oSay10  PROMPT "Legenda:"               SIZE 025, 007 PIXEL OF oDlgMain FONT oBold COLORS 0, 12632256 
+//@ 094, 414 MSGET oRed1   VAR    oRed                     SIZE 015, 010 PIXEL OF oDlgMain READONLY   //COLORS 0, 12632256  
+@ 094, 314 BITMAP oRed1 RESNAME "BR_VERMELHO" SIZE 16,16 NOBORDER OF oDlgMain PIXEL
+@ 095, 325 SAY   oSay8   PROMPT "Com Bloqueio Comercial" SIZE 110, 007 PIXEL OF oDlgMain FONT oBold COLORS 0, 12632256 
+//@ 094, 494 MSGET oBlue1  VAR    oBlue                    SIZE 015, 010 PIXEL OF oDlgMain READONLY   COLORS 0, 12632256  
+@ 094, 410 BITMAP oBlue1 RESNAME "BR_AZUL" SIZE 16,16 NOBORDER OF oDlgMain PIXEL
+@ 095, 420 SAY   oSay9   PROMPT "Sem Bloqueio Comercial" SIZE 110, 007 PIXEL OF oDlgMain FONT oBold COLORS 0, 12632256 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // GRID 
@@ -278,8 +282,8 @@ Static Function fWBrowse1()
       aWBrowse1[oWBrowse1:nAt,15];
     }}
     // DoubleClick event
-    oWBrowse1:bLDblClick := {|| aWBrowse1[oWBrowse1:nAt,1] := !aWBrowse1[oWBrowse1:nAt,1],;
-      oWBrowse1:DrawSelect()}
+    //oWBrowse1:bLDblClick := {|| aWBrowse1[oWBrowse1:nAt,1] := !aWBrowse1[oWBrowse1:nAt,1],;
+    //  oWBrowse1:DrawSelect()}
 RestArea(aArea)
 Return
 
@@ -354,7 +358,8 @@ User Function DADOSAPRO()
 	cQuery += " LEFT JOIN " + RetSQLName("SBZ") + " SBZ ON SBZ.D_E_L_E_T_ <> '*' AND SBZ.BZ_COD = SC6.C6_PRODUTO " + ENTER
 	cQuery += " INNER JOIN " + RetSQLName("SB1") + " SB1 ON SB1.D_E_L_E_T_ <> '*' AND SB1.B1_COD = SC6.C6_PRODUTO " + ENTER
 	cQuery += " INNER JOIN " + RetSQLName("SZC") + " SZC ON SZC.D_E_L_E_T_ <> '*' AND SC5.C5_VEND1 = SZC.ZC_VEND " + ENTER
-	cQuery += " 						                AND SZC.ZC_GRPROD = SB1.B1_GRUPO " + ENTER
+//	cQuery += " 						                AND SZC.ZC_GRPROD = SB1.B1_GRUPO " + ENTER
+	cQuery += "                                         AND SB1.B1_GRUPO >= SZC.ZC_GRPROD AND SB1.B1_GRUPO <= SZC.ZC_GRPRODA " + ENTER
 	cQuery += " INNER JOIN " + RetSQLName("SBM") + " SBM ON SBM.D_E_L_E_T_ <> '*' AND SBM.BM_GRUPO = SZC.ZC_GRPROD " + ENTER
 	cQuery += " WHERE " + ENTER
 	cQuery += " SC6.D_E_L_E_T_ <> '*' " + ENTER

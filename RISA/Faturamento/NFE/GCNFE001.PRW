@@ -140,7 +140,7 @@ If aNota[4] == "1"
 				SBM->(dbGoTop())
 				SBM->(dbSeek(xFilial("SBM") + SB1->B1_GRUPO))
 				
-				
+
 				//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 				//ЁCarrega informaГУes vinculadas Ю campos especificos do item do documento fiscalЁ
 				//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
@@ -152,7 +152,7 @@ If aNota[4] == "1"
 					cInfProd += "Renda: " + ALLTRIM(TRANSFORM(SD2->D2_GCRENDA, "99/99")) + hQuebraCpl
 				EndIf
 
-				If SB1->B1_GCKGSAC > 0
+				If SB1->(FieldPos("B1_GCKGSAC")) > 0 .AND. SB1->B1_GCKGSAC > 0
 					cInfProd += "Valor Saca R$ " + ALLTRIM(TRANSFORM(ROUND((SD2->D2_PRCVEN * SB1->B1_GCKGSAC), TAMSX3("D2_TOTAL")[2]), PESQPICT("SD2", "D2_TOTAL"))) + hQuebraCpl
 				EndIf
 				
@@ -186,12 +186,27 @@ If aNota[4] == "1"
 				If SD2->(FieldPos("D2_GCCONTS")) > 0 .AND. !EMPTY(SD2->D2_GCCONTS)
 					cInfProd += "Ct. ServiГo: " + ALLTRIM(TRANSFORM(SD2->D2_GCCONTS, PESQPICT("ZDP", "ZDP_NUM"))) + hQuebraCpl
 				EndIf
+
+				If SD2->(FieldPos("D2_LOTECTL")) > 0 .AND. !EMPTY(SD2->D2_LOTECTL)
+					cInfProd += "Lote: " + ALLTRIM(SD2->D2_LOTECTL) + " Dt. Validade: " + DTOC(SD2->D2_DTVALID) + hQuebraCpl
+				EndIf
+
+				If SD2->(FieldPos("D2_NFORI")) > 0 .AND. !EMPTY(SD2->D2_NFORI)
+					cInfProd += "NF Ref.: " + ALLTRIM(SD2->D2_NFORI) + "\" + ALLTRIM(SD2->D2_SERIORI) + "-" + ALLTRIM(SD2->D2_ITEMORI) + hQuebraCpl
+				EndIf
 				
 				//зддддддддддддддддддддддддддддддддддддддддддддддддд
 				//ЁComplementa as informaГУes adicionais do produtoЁ
 				//юддддддддддддддддддддддддддддддддддддддддддддддддд
 				aProd[nI][25] += cInfProd
 				
+
+				//здддддддддддддддддддддддддддддддддддддддддддд
+				//ЁMensagem nos dados adicionais do Ped. VendaЁ
+				//здддддддддддддддддддддддддддддддддддддддддддд
+				If SD2->(FieldPos("D2_PEDIDO")) > 0 .AND. !EMPTY(SD2->D2_PEDIDO) .AND. !(hQuebraCpl + "Ped. Venda: " + ALLTRIM(SD2->D2_PEDIDO)) $ cMensCli
+					cMensCli += hQuebraCpl + "Ped. Venda: " + ALLTRIM(SD2->D2_PEDIDO)
+				EndIf
 
 				//зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 				//ЁCarrega informaГУes\menagens do contrato de compra vinculadoЁ
@@ -501,6 +516,14 @@ Else
 				
 				If SD1->(FieldPos("D1_GCCONTS")) > 0 .AND. !EMPTY(SD1->D1_GCCONTS)
 					cInfProd += "Ct. ServiГo: " + ALLTRIM(TRANSFORM(SD1->D1_GCCONTS, PESQPICT("ZDP", "ZDP_NUM"))) + hQuebraCpl
+				EndIf
+
+				If SD1->(FieldPos("D1_LOTECTL")) > 0 .AND. !EMPTY(SD1->D1_LOTECTL)
+					cInfProd += "Lote: " + ALLTRIM(SD1->D1_LOTECTL) + " Dt. Validade: " + DTOC(SD1->D1_DTVALID) + hQuebraCpl
+				EndIf
+
+				If SD1->(FieldPos("D1_NFORI")) > 0 .AND. !EMPTY(SD1->D1_NFORI)
+					cInfProd += "NF Ref.: " + ALLTRIM(SD1->D1_NFORI) + "\" + ALLTRIM(SD1->D1_SERIORI) + "-" + ALLTRIM(SD1->D1_ITEMORI) + hQuebraCpl
 				EndIf
 				
 				//зддддддддддддддддддддддддддддддддддддддддддддддддд

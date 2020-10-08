@@ -18,18 +18,6 @@
 User Function MTASF2()
   
 
-
-
-
-
-
-
-
-
-
-
-
-
 //                                            ^
 //                                            |
 /*Implemente o ponto de entrada antes da chamada do Bloco de Função do Gestão de Cereais....*/
@@ -39,6 +27,13 @@ User Function MTASF2()
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 If ExistBlock("xMTASF2")
 	ExecBlock( "xMTASF2", .F., .F.)
+EndIf
+
+// Chamadas de outros modulos que nao utilizam as regras de precos e descontos
+If ! U_USAREGRA()
+    If ExistBlock("GRVMOTORIS")
+        ExecBlock( "GRVMOTORIS", .F., .F.)//Grava dados do Motorista para impressão da Danfe
+    Endif
 EndIf
 
 Return .T.

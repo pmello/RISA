@@ -20,12 +20,5 @@ If ExistBlock("GRVCD6COMB")
     ExecBlock( "GRVCD6COMB", .F., .F.) //Grava dados ANP tabela CD6 conforme regra no parametro MV_COMBUS - chamado no fonte CFGXFAT
 Endif
 
-// Chamadas de outros modulos que nao utilizam as regras de precos e descontos
-If U_USAREGRA()
-    If ExistBlock("GRVMOTORIS")
-        ExecBlock( "GRVMOTORIS", .F., .F.)//Grava dados do Motorista para impressão da Danfe
-    Endif
-EndIf
-
 RestArea(aArea)
 RETURN()

@@ -7,12 +7,17 @@
 			"name": "TOTVS Language Debug",
 			"program": "${command:AskForProgramName}",
 			"cwb": "${workspaceFolder}",
-			"smartclientBin": "C:/Users/emerson.natali/Desktop/RISA_SMARTCLIENT/smartclient.exe",
+			"smartclientBin": "C:\smartclientLGANTIGO\smartclient.exe",
 			"isMultiSession": true,
 			"enableTableSync": true
 		}
 	],
 	"lastPrograms": [
+		{
+			"args": [],
+			"label": "SIGACFG",
+			"description": ""
+		},
 		{
 			"args": [],
 			"label": "SIGAMDI",

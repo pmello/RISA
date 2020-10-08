@@ -20,7 +20,7 @@ User Function CADREGRA()
 Local cTitulo		:= "Cadastro do Comissionado"
 Local cCodVend		:= SA3->A3_COD
 Local cNomVend		:= SA3->A3_NOME
-Local aColSizSZA	:= {{"ZA_CODMUN ",25}, {"ZA_TABELA ",10}}
+//Local aColSizSZA	:= {{"ZA_CODMUN ",25}, {"ZA_TABELA ",10}}
 Local aNoFielSZA	:= {"ZA_CODIBGE", "ZA_VEND", "ZA_USER", "ZA_DTINC"}
 Local aColSizSZB	:= {{"ZB_DESCOND",348}}
 Local aNoFielSZB	:= {"ZB_VEND", "ZB_USER", "ZB_DTINC"}
@@ -73,6 +73,12 @@ aPasta := { "Cidades","Condicoes de Pagamento","Descontos","Operacoes"}
 @ 010,042 MSGET oCodVend   VAR cCodVend	Picture "@!"	SIZE 030,10 PIXEL OF oDlgMain When .F.
 @ 010,075 MSGET oNomVend   VAR cNomVend	Picture "@!"	SIZE 150,10 PIXEL OF oDlgMain When .F.
 
+//Criando barras de rolagem
+@ 001, 003 SCROLLBOX oScrollP1 HORIZONTAL VERTICAL SIZE 105,390 OF oFolder:aDialogs[1]
+@ 001, 003 SCROLLBOX oScrollP2 HORIZONTAL VERTICAL SIZE 105,390 OF oFolder:aDialogs[2]
+@ 001, 003 SCROLLBOX oScrollP3 HORIZONTAL VERTICAL SIZE 105,390 OF oFolder:aDialogs[3]
+@ 001, 003 SCROLLBOX oScrollP4 HORIZONTAL VERTICAL SIZE 105,390 OF oFolder:aDialogs[4]
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Pasta  01 - Regioes
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////        
@@ -82,17 +88,23 @@ cQuery += "FROM " + RetSQLName("SZA") + " SZA " + ENTER
 cQuery += "INNER JOIN " + RetSQLName("DA0") + " DA0 ON DA0_FILIAL = '"+  xFilial("DA0")+"' AND SZA.ZA_TABELA = DA0.DA0_CODTAB AND DA0.D_E_L_E_T_ <> '*' "  + ENTER
 cQuery += "WHERE SZA.ZA_FILIAL = '"+xFilial("SZA") + "'" + " AND SZA.D_E_L_E_T_ <> '*' " + ENTER
 cQuery += "AND SZA.ZA_VEND = '" + SA3->A3_COD + "' " + ENTER	
-cQuery += "ORDER BY ZA_CODMUN  " + ENTER
+//cQuery += "ORDER BY ZA_CODMUN  " + ENTER
 
 cQuerySZA := ChangeQuery(cQuery)
 
-FillGetDados(nOpc,"SZA",1,/*cSeek*/,/*{|| &cWhile }*/,{|| .T. },aNoFielSZA,/*aYesFields*/,/*lOnlyYes*/,cQuerySZA,/*bMontCols*/,/*lEmpty*/,aHeaderSZA,aColsSZA)
+FillGetDados(nOpc,"SZA",1,/*cSeek*/,/*{|| &cWhile }*/,{|| .T. },aNoFielSZA,/*aYesFields*/,/*lOnlyYes*/,cQuerySZA,/*bMontCols*/,.F.,aHeaderSZA,aColsSZA,/*bafterCols*/,/*bBeforeCols*/,/*bAfterHeader*/)
+
+//oGetSZA:=	MsNewGetDados():New(003,003,295,673,nModo,;
+//"AllwaysTrue()","AllwaysTrue()","",/*aAlterSZA*/,,999,"AllwaysTrue()",,"AllwaysTrue()",oFolder:aDialogs[1],aHeaderSZA,aColsSZA,,,aColSizSZA)      	
 
 oGetSZA:=	MsNewGetDados():New(003,003,295,673,nModo,;
-"AllwaysTrue()","AllwaysTrue()","",/*aAlterSZA*/,,999,"AllwaysTrue()",,"AllwaysTrue()",oFolder:aDialogs[1],aHeaderSZA,aColsSZA,,,aColSizSZA)      	
+"AllwaysTrue()","AllwaysTrue()","",/*aAlterSZA*/,,999,"AllwaysTrue()",,"AllwaysTrue()",oScrollP1,aHeaderSZA,aColsSZA)      	
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Pasta  02 - Condicoes de Pagamento
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 RegToMemory("SZB",.F.)	
 cQuery := "SELECT *, " + ENTER 
 cQuery += "E4_DESCRI DESCRI, SZB.R_E_C_N_O_ RECNO " + ENTER 
@@ -106,7 +118,8 @@ cQuerySZB := ChangeQuery(cQuery)
 
 FillGetDados(nOpc,"SZB",1,/*cSeek*/,/*{|| &cWhile }*/,{|| .T. },aNoFielSZB,/*aYesFields*/,/*lOnlyYes*/,cQuerySZB,/*bMontCols*/,/*lEmpty*/,aHeaderSZB,aColsSZB)
 oGetSZB:=	MsNewGetDados():New(003,003,295,673,nModo,;
-"AllwaysTrue()","AllwaysTrue()","",/*aAlterSZB*/,,999,"AllwaysTrue()",,"AllwaysTrue()",oFolder:aDialogs[2],aHeaderSZB,aColsSZB,,,aColSizSZB)      	
+"AllwaysTrue()","AllwaysTrue()","",/*aAlterSZB*/,,999,"AllwaysTrue()",,"AllwaysTrue()",oScrollP2,aHeaderSZB,aColsSZB,,,aColSizSZB)      	
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Pasta  03 - Descontos
@@ -124,7 +137,7 @@ cQuerySZC := ChangeQuery(cQuery)
 
 FillGetDados(nOpc,"SZC",1,/*cSeek*/,/*{|| &cWhile }*/,{|| .T. },aNoFielSZC,/*aYesFields*/,/*lOnlyYes*/,cQuerySZC,/*bMontCols*/,/*lEmpty*/,aHeaderSZC,aColsSZC)
 oGetSZC:=	MsNewGetDados():New(003,003,295,673,nModo,;
-"AllwaysTrue()","AllwaysTrue()","",/*aAlterSZC*/,,999,"AllwaysTrue()",,"AllwaysTrue()",oFolder:aDialogs[3],aHeaderSZC,aColsSZC,,,aColSizSZC)      	
+"AllwaysTrue()","AllwaysTrue()","",/*aAlterSZC*/,,999,"AllwaysTrue()",,"AllwaysTrue()",oScrollP3,aHeaderSZC,aColsSZC,,,aColSizSZC)      	
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Pasta  04 - Operacoes
@@ -142,7 +155,7 @@ cQuerySZE := ChangeQuery(cQuery)
 
 FillGetDados(nOpc,"SZE",1,/*cSeek*/,/*{|| &cWhile }*/,{|| .T. },aNoFielSZE,/*aYesFields*/,/*lOnlyYes*/,cQuerySZE,/*bMontCols*/,/*lEmpty*/,aHeaderSZE,aColsSZE)
 oGetSZE:=	MsNewGetDados():New(003,003,295,673,nModo,;
-"AllwaysTrue()","AllwaysTrue()","",/*aAlterSZE*/,,999,"AllwaysTrue()",,"AllwaysTrue()",oFolder:aDialogs[4],aHeaderSZE,aColsSZE,,,aColSizSZE)      	
+"AllwaysTrue()","AllwaysTrue()","",/*aAlterSZE*/,,999,"AllwaysTrue()",,"AllwaysTrue()",oScrollP4,aHeaderSZE,aColsSZE,,,aColSizSZE)      	
 
 @ 160,343 BUTTON oCancel PROMPT "Cancelar"  ACTION (oDlgMain:End())	SIZE 36,12  PIXEL 
 @ 160,380 BUTTON oOk	 PROMPT "OK"        ACTION (IIF(Confirma(),oDlgMain:End(),))	SIZE 26,12 	PIXEL
@@ -155,7 +168,7 @@ Static Function Confirma
 //////////////////////////////////////////////////////////////////////////////////////////////////
 Local nLinha := 0
 Local nPosTab		:= aScan( aHeaderSZA, {|x| Alltrim(x[2]) == "ZA_TABELA"  })
-Local nPosCdMun		:= aScan( aHeaderSZA, {|x| Alltrim(x[2]) == "ZA_CODMUN"	})
+//Local nPosCdMun		:= aScan( aHeaderSZA, {|x| Alltrim(x[2]) == "ZA_CODMUN"	})
 Local nPosUF		:= aScan( aHeaderSZA, {|x| Alltrim(x[2]) == "ZA_UF"		})
 Local nPosRecSZA	:= aScan( aHeaderSZA, {|x| Alltrim(x[2]) == "ZA_REC_WT"	})
 Local nPosDelSZA	:= Len(aHeaderSZA) + 1
@@ -163,6 +176,7 @@ Local nPosCond		:= aScan( aHeaderSZB, {|x| Alltrim(x[2]) == "ZB_COND"	})
 Local nPosRecSZB	:= aScan( aHeaderSZB, {|x| Alltrim(x[2]) == "ZB_REC_WT"	})
 Local nPosDelSZB	:= Len(aHeaderSZB) + 1
 Local nPosGrPro		:= aScan( aHeaderSZC, {|x| Alltrim(x[2]) == "ZC_GRPROD"	}) 
+Local nPosGrProA    := aScan( aHeaderSZC, {|x| Alltrim(x[2]) == "ZC_GRPRODA"}) 
 Local nPosDesMin	:= aScan( aHeaderSZC, {|x| Alltrim(x[2]) == "ZC_DESMIN"	}) 
 Local nPosDesMax	:= aScan( aHeaderSZC, {|x| Alltrim(x[2]) == "ZC_DESMAX"	}) 
 Local nPosComis		:= aScan( aHeaderSZC, {|x| Alltrim(x[2]) == "ZC_COMIS"	}) 
@@ -185,10 +199,14 @@ For nLinha := 1 to Len( aColsSZA )
         MsgStop("Campo Tabela é de preenchimento obrigatorio")
         Return .F.
     Endif      
+
+	/*
     If Empty(aColsSZA[ nLinha, nPosCdMun])
         MsgStop("Campo Cod.Municipio é de preenchimento obrigatorio")
         Return .F.
     Endif   
+	*/
+
     If Empty(aColsSZA[ nLinha, nPosUF])
         MsgStop("Campo Sigla Estado é de preenchimento obrigatorio")
         Return .F.
@@ -196,7 +214,8 @@ For nLinha := 1 to Len( aColsSZA )
 Next
 For nLinha := 1 to Len( aColsSZA )
 	IF aColsSZA[ nLinha, nPosRecSZA] = 0
-		If DbSeek(xFilial("SZA") + SA3->A3_COD + aColsSZA[ nLinha, nPosUF] + aColsSZA[ nLinha, nPosCdMun] + aColsSZA[ nLinha, nPosTab]) // ZA_FILIAL + ZA_VEND + ZA_UF + ZA_CODMUN + ZA_TABELA  
+//		If DbSeek(xFilial("SZA") + SA3->A3_COD + aColsSZA[ nLinha, nPosUF] + aColsSZA[ nLinha, nPosCdMun] + aColsSZA[ nLinha, nPosTab]) // ZA_FILIAL + ZA_VEND + ZA_UF + ZA_CODMUN + ZA_TABELA  
+		If DbSeek(xFilial("SZA") + SA3->A3_COD + aColsSZA[ nLinha, nPosUF] + aColsSZA[ nLinha, nPosTab]) // ZA_FILIAL + ZA_VEND + ZA_UF + ZA_TABELA  
 			RECLOCK("SZA",.F.)
 		Else
 			RECLOCK("SZA",.T.)
@@ -206,7 +225,7 @@ For nLinha := 1 to Len( aColsSZA )
             SZA->ZA_DTINC   := Date()
 		Endif
 		SZA->ZA_TABELA	:= aColsSZA[ nLinha, nPosTab] 	
-		SZA->ZA_CODMUN	:= aColsSZA[ nLinha, nPosCdMun]	
+		//SZA->ZA_CODMUN	:= aColsSZA[ nLinha, nPosCdMun]	
 		SZA->ZA_UF		:= aColsSZA[ nLinha, nPosUF]	
 		SZA->( MsUnLock() )
 	ELSE
@@ -216,7 +235,7 @@ For nLinha := 1 to Len( aColsSZA )
 			DbDelete()
 		Else									//SENAO é ALTERAR
 		SZA->ZA_TABELA	:= aColsSZA[ nLinha, nPosTab] 
-		SZA->ZA_CODMUN	:= aColsSZA[ nLinha, nPosCdMun]	
+		//SZA->ZA_CODMUN	:= aColsSZA[ nLinha, nPosCdMun]	
 		SZA->ZA_UF		:= aColsSZA[ nLinha, nPosUF]	
 		ENDIF		
 		SZA->( MsUnLock() )
@@ -278,6 +297,7 @@ For nLinha := 1 to Len( aColsSZC )
             SZC->ZC_DTINC   := Date()
 		Endif
 		SZC->ZC_GRPROD	:= aColsSZC[ nLinha, nPosGrPro] 
+		SZC->ZC_GRPRODA	:= aColsSZC[ nLinha, nPosGrProA] 		
 		SZC->ZC_DESMIN	:= aColsSZC[ nLinha, nPosDesMin] 
 		SZC->ZC_DESMAX	:= aColsSZC[ nLinha, nPosDesMax] 
 		SZC->ZC_COMIS	:= aColsSZC[ nLinha, nPosComis] 
@@ -289,6 +309,7 @@ For nLinha := 1 to Len( aColsSZC )
 			DbDelete()
 		Else									// SENAO é ALTERAR
 			SZC->ZC_GRPROD	:= aColsSZC[ nLinha, nPosGrPro] 
+			SZC->ZC_GRPRODA	:= aColsSZC[ nLinha, nPosGrProA] 			
 			SZC->ZC_DESMIN	:= aColsSZC[ nLinha, nPosDesMin] 
 			SZC->ZC_DESMAX	:= aColsSZC[ nLinha, nPosDesMax] 
 			SZC->ZC_COMIS	:= aColsSZC[ nLinha, nPosComis] 

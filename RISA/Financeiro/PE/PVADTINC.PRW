@@ -5,6 +5,6 @@ meio da rotina do pedido de venda e pedido de compras.
 */
 User Function PVADTINC()
 
-Local lRet := .T. //Bloqueia a inclusão de PA ou RA
+Local lRet := .F. //Bloqueia a inclusão de PA ou RA
 
 Return lRet

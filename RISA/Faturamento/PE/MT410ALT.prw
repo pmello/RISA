@@ -22,10 +22,8 @@ If U_USAREGRA()
         ExecBlock( "BlocPed", .F., .F.)
     Endif
     If ExistBlock("AESS001")
-        IF SC5->C5_BLQ <> "X" .OR. SC5->C5_BLQ <> "Y"  //Bloqueado X (Regra de Desconto) / Bloqueado Y (Regra Garantia)
-            If MSGYESNO("Deseja imprimir o pedido?")
-                ExecBlock( "AESS001", .F., .F.)
-            Endif
+        If MSGYESNO("Deseja imprimir o pedido?")
+            ExecBlock( "AESS001", .F., .F.)
         Endif
     Endif
 

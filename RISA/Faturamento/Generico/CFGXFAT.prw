@@ -1,5 +1,5 @@
 #INCLUDE "TOTVS.CH"
-
+#INCLUDE "colors.ch"
 /*/
 
 {Protheus.doc} CFGXFAT
@@ -171,7 +171,8 @@ If !Empty(M->C5_VEND1) .AND. !Empty(M->C5_CLIENTE)
     cQuery += " WHERE SZA.D_E_L_E_T_ <> '*'"
     cQuery += "     AND SZA.ZA_FILIAL = '" + xFilial( "SZA" ) + "'" 
     cQuery += "     AND SZA.ZA_VEND = '" + M->C5_VEND1 + "' "
-    cQuery += "	    AND SZA.ZA_CODMUN+SZA.ZA_UF IN (SELECT SA1.A1_COD_MUN+SA1.A1_EST FROM " + RetSQLName("SA1") + " SA1 WHERE SA1.D_E_L_E_T_ <> '*' AND SA1.A1_COD + SA1.A1_LOJA = '" + M->C5_CLIENTE+M->C5_LOJACLI + "')"
+//    cQuery += "	    AND SZA.ZA_CODMUN+SZA.ZA_UF IN (SELECT SA1.A1_COD_MUN+SA1.A1_EST FROM " + RetSQLName("SA1") + " SA1 WHERE SA1.D_E_L_E_T_ <> '*' AND SA1.A1_COD + SA1.A1_LOJA = '" + M->C5_CLIENTE+M->C5_LOJACLI + "')"
+    cQuery += "	    AND SZA.ZA_UF IN (SELECT SA1.A1_EST FROM " + RetSQLName("SA1") + " SA1 WHERE SA1.D_E_L_E_T_ <> '*' AND SA1.A1_COD + SA1.A1_LOJA = '" + M->C5_CLIENTE+M->C5_LOJACLI + "')"
     cQuery += "     AND SZA.ZA_TABELA = '" + M->C5_TABELA + "' "
 
     Memowrite('ValTabP.SQL',cQuery)
@@ -246,7 +247,9 @@ If !EMPTY(M->C5_VEND1) .AND. !EMPTY(M->C5_TABELA) .AND. !EMPTY(M->C6_PRODUTO)
     cQuery := "SELECT DA1.DA1_CODPRO "
     cQuery += " FROM " + RetSQLName("DA1") + " DA1 "
     cQuery += "       INNER JOIN " + RetSQLName("SB1") + " SB1 ON SB1.D_E_L_E_T_ <> '*' AND SB1.B1_COD = DA1.DA1_CODPRO "
-    cQuery += "       INNER JOIN " + RetSQLName("SZC") + " SZC ON SZC.D_E_L_E_T_ <> '*' AND SZC.ZC_GRPROD = SB1.B1_GRUPO AND SZC.ZC_VEND = '" + M->C5_VEND1 + "' "
+    cQuery += "       INNER JOIN " + RetSQLName("SZC") + " SZC ON SZC.D_E_L_E_T_ <> '*' "
+    cQuery += "       AND SB1.B1_GRUPO >= SZC.ZC_GRPROD AND SB1.B1_GRUPO <= SZC.ZC_GRPRODA "
+    cQuery += "       AND SZC.ZC_VEND = '" + M->C5_VEND1 + "' "
     cQuery += " WHERE DA1.D_E_L_E_T_ <> '*' AND DA1.DA1_CODTAB = '" + M->C5_TABELA + "' AND DA1.DA1_CODPRO = '" + M->C6_PRODUTO + "' "
 
 	Memowrite('ValProd.SQL',cQuery)
@@ -342,16 +345,25 @@ If lRet
                 DbSelectARea("SZC")
                 DbSetOrder(1)
                 // validação de margem de desconto
-                IF DBSEEK( xFilial("SZC") + M->C5_VEND1 + cGRPPRD )
-                    IF nDesc > SZC->ZC_DESMAX
-                        MsgStop("Desconto acima do limite do vendedor ( " + Transform(SZC->ZC_DESMAX,"99%") + " ) !")
-                        // Validação de Preço Mínimo.
-                        lRet := U_ValPrcMin(nPrcVen) //nPrcVen já esta com o desconto aplicado. //,nDesc)
-                    ELSEIF nDesc < SZC->ZC_DESMIN
-                        MsgStop("Desconto abaixo do limite do vendedor ( " + Transform(SZC->ZC_DESMIN,"99%") + " ) !")
-                    ELSE
-                        lRet := .T.
-                    ENDIF
+                //IF DBSEEK( xFilial("SZC") + M->C5_VEND1 + cGRPPRD )
+                IF DBSEEK( xFilial("SZC") + M->C5_VEND1 )
+                    While !Eof() .and. M->C5_VEND1 == SZC->ZC_VEND
+
+                        If cGRPPRD >= SZC->ZC_GRPROD .and. cGRPPRD <= SZC->ZC_GRPRODA
+                            IF nDesc > SZC->ZC_DESMAX
+                                MsgStop("Desconto acima do limite do vendedor ( " + Transform(SZC->ZC_DESMAX,"99%") + " ) !")
+                                // Validação de Preço Mínimo.
+                                lRet := U_ValPrcMin(nPrcVen) //nPrcVen já esta com o desconto aplicado. //,nDesc)
+                            ELSEIF nDesc < SZC->ZC_DESMIN
+                                MsgStop("Desconto abaixo do limite do vendedor ( " + Transform(SZC->ZC_DESMIN,"99%") + " ) !")
+                            ELSE
+                                lRet := .T.
+                            ENDIF
+                        Endif
+
+                        DbSelectArea("SZC")
+                        DbSkip()
+                    Enddo
                 Else
                     MsgStop("Vendedor nao autorizado para esse grupo de produtos")
                 ENDIF
@@ -437,13 +449,21 @@ If lRet
                 cGRPPRD := SB1->B1_GRUPO
                 DbSelectARea("SZC")
                 DbSetOrder(1)
-                If DBSEEK( xFilial("SZC") + M->C5_VEND1 + cGRPPRD )
-                    If nDesc > SZC->ZC_DESMAX // .or. nDesc < SZC->ZC_DESMIN
-                        aCols[n,nPosXofer] := '3' // Oferta passa a ser fora alçada de desconto.
-                        aCols[n,nPosXblq ] := '1' // Bloqueio o pedido.
-                        aCols[n,nPosComis] := SZC->ZC_COMIS
-                        cRet := '3'
-                    ENDIF
+                //If DBSEEK( xFilial("SZC") + M->C5_VEND1 + cGRPPRD )
+                If DBSEEK( xFilial("SZC") + M->C5_VEND1 )
+                    While !Eof() .and. M->C5_VEND1 == SZC->ZC_VEND
+                        If cGRPPRD >= SZC->ZC_GRPROD .and. CGRPPRD <= SZC->ZC_GRPRODA
+                            If nDesc > SZC->ZC_DESMAX // .or. nDesc < SZC->ZC_DESMIN
+                                aCols[n,nPosXofer] := '3' // Oferta passa a ser fora alçada de desconto.
+                                aCols[n,nPosXblq ] := '1' // Bloqueio o pedido.
+                                aCols[n,nPosComis] := SZC->ZC_COMIS
+                                cRet := '3'
+                            Endif
+                        Endif
+                        
+                        DbSelectArea("SZC")
+                        DbSkip()
+                    Enddo
                 ENDIF
             ENDIF
         ENDIF
@@ -526,7 +546,8 @@ If !Empty(M->C5_CLIENTE) .AND. !Empty(M->C5_VEND1)
     cQuery += " WHERE   SZA.D_E_L_E_T_ <> '*'"
     cQuery += "     AND SZA.ZA_FILIAL = '" + xFilial( "SZA" ) + "'" 
     cQuery += "     AND SZA.ZA_VEND = '" + M->C5_VEND1 + "' "
-    cQuery += "	    AND SZA.ZA_CODMUN+SZA.ZA_UF IN (SELECT SA1.A1_COD_MUN+SA1.A1_EST FROM " + RetSQLName("SA1") + " SA1 WHERE SA1.D_E_L_E_T_ <> '*' AND SA1.A1_COD + SA1.A1_LOJA = '" + M->C5_CLIENTE+M->C5_LOJACLI + "')"
+//    cQuery += "	    AND SZA.ZA_CODMUN+SZA.ZA_UF IN (SELECT SA1.A1_COD_MUN+SA1.A1_EST FROM " + RetSQLName("SA1") + " SA1 WHERE SA1.D_E_L_E_T_ <> '*' AND SA1.A1_COD + SA1.A1_LOJA = '" + M->C5_CLIENTE+M->C5_LOJACLI + "')"
+    cQuery += "	    AND SZA.ZA_UF IN (SELECT SA1.A1_EST FROM " + RetSQLName("SA1") + " SA1 WHERE SA1.D_E_L_E_T_ <> '*' AND SA1.A1_COD + SA1.A1_LOJA = '" + M->C5_CLIENTE+M->C5_LOJACLI + "')"
 
     Memowrite('FiltraDA0.SQL',cQuery)
     ChangeQuery(cQuery)
@@ -589,7 +610,9 @@ If !Empty(M->C5_TABELA) .AND. !Empty(M->C5_VEND1)
     cQuery := "SELECT DA1.DA1_CODPRO "
     cQuery += " FROM " + RetSQLName("DA1") + " DA1 "
     cQuery += "       INNER JOIN " + RetSQLName("SB1") + " SB1 ON SB1.D_E_L_E_T_ <> '*' AND SB1.B1_COD = DA1.DA1_CODPRO "
-    cQuery += "       INNER JOIN " + RetSQLName("SZC") + " SZC ON SZC.D_E_L_E_T_ <> '*' AND SZC.ZC_GRPROD = SB1.B1_GRUPO AND SZC.ZC_VEND = '" + M->C5_VEND1 + "' "
+    cQuery += "       INNER JOIN " + RetSQLName("SZC") + " SZC ON SZC.D_E_L_E_T_ <> '*' "
+    cQuery += "       AND SB1.B1_GRUPO >= SZC.ZC_GRPROD AND SB1.B1_GRUPO <= SZC.ZC_GRPRODA "
+    cQuery += "       AND SZC.ZC_VEND = '" + M->C5_VEND1 + "' "
     cQuery += " WHERE DA1.D_E_L_E_T_ <> '*' AND DA1.DA1_CODTAB = '" + M->C5_TABELA + "' "
 
     Memowrite('VerTab.SQL',cQuery)
@@ -687,8 +710,15 @@ Else
         cGRPPRD := SB1->B1_GRUPO
         DBSELECTAREA('SZC')
         SZC->( dbSetOrder(1) )
-        If SZC->( DbSEEK( xFilial("SZC") + M->C5_VEND1 + cGRPPRD )) // ESTAVA BUSCANDO FILIAL SB1 MAS O MODO DE COMP É # DA SZC
-            nRet := SZC->ZC_COMIS
+        //If SZC->( DbSEEK( xFilial("SZC") + M->C5_VEND1 + cGRPPRD )) // ESTAVA BUSCANDO FILIAL SB1 MAS O MODO DE COMP É # DA SZC
+        If SZC->( DbSEEK( xFilial("SZC") + M->C5_VEND1 )) // ESTAVA BUSCANDO FILIAL SB1 MAS O MODO DE COMP É # DA SZC
+            While !Eof() .and. M->C5_VEND1 == SZC->ZC_VEND
+                If cGRPPRD >= SZC->ZC_GRPROD .and. cGRPPRD <= SZC->ZC_GRPRODA
+                    nRet := SZC->ZC_COMIS
+                Endif
+                DbSelectArea("SZC")
+                DbSkip()
+            Enddo
         Else
             MsgStop("Nao achou a regra!")
         ENDIF
@@ -894,6 +924,7 @@ User Function CFGXMNUPV()
 
 //Rotina de preparação Documento de Saida ("Ma410PvNfs")
 aRotina[ascan(arotina,{|x| alltrim(x[2]) == "Ma410PvNfs"}),2] := "u_CFGXBLOQ()"
+aAdd(aRotina, {"Imprimir Pedido",'U_AESS001()',0,7,0,NIL})
 
 Return()
 
@@ -976,7 +1007,7 @@ Private cNmMotor:= Space( TamSX3("DA4_NOME")[1] )  // Nome do Veículo
 
 DEFINE MSDIALOG oDlg TITLE cTitulo  OF oMainWnd PIXEL FROM 040,040 TO 430,1200
 
-@ 066, 009 SAY   oSay3    PROMPT "Motorista"      SIZE 043, 007 PIXEL OF oDlg FONT oBold COLORS 0, 12632256
+@ 066, 009 SAY   oSay3    PROMPT "Motorista"      SIZE 043, 007 PIXEL OF oDlg //FONT oBold COLORS 0, 12632256
 @ 064, 040 MSGET oMotor   VAR    cMotor           SIZE 043, 010 PIXEL OF oDlg When .T.   F3 "DA4" VALID ValMotor( cMotor )
 @ 064, 100 MSGET oNMMtor  VAR    cNMMotor         SIZE 080, 010 PIXEL OF oDlg When .F.
 

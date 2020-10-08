@@ -110,6 +110,19 @@ DbSelectArea("SC5")
 DbSetOrder(1)
 DbSeek(xFilial("SC5")+cNumOrc,.T.)
 
+//Somente imprime pedido sem bloqueio de regra de desconto ou regra de garantia
+
+IF SC5->C5_BLQ == "X" .OR. SC5->C5_BLQ == "Y" //Bloqueado X (Regra de Desconto) / Bloqueado Y (Regra Garantia)
+	If SC5->C5_BLQ == "X"
+		MsgStop("Pedido não pode ser impresso. Pedido bloqueado por: [REGRA DE DESCONTO / COMERCIAL] ")
+	Else
+		MsgStop("Pedido não pode ser impresso. Pedido bloqueado por: [REGRA GARANTIA] ")
+	Endif
+
+	Return
+
+Endif
+
 aDadosOrc    := {AllTrim(C5_NUM)		            	,;  // [1] Número do orcamento
 		   		C5_EMISSAO                              ,;  // [2] Data da emissão do orcamento
    				C5_VEND1   		                        ,;  // [3] Vendedor
