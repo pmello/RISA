@@ -52,8 +52,10 @@ If VerSenha(136) .And. VerSenha(137)
 	dbSelectArea("SC5")
 	dbSetOrder(1)
 // AURICELIO PEDIU PRA SEMPRE MOSTRAR TODOS OS PEDIDOS PARA NOVAMENTE BLOQUEA-LO
-	cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_BLQ == 'Y' "
-	//cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"'"
+	//cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_BLQ == 'Y' "
+	//cCondicao := "C5_FILIAL ==''"+xFilial("SC5")+"'"
+	//!Empty(C5_NOTA).Or.C5_LIBEROK=='E' .And. Empty(C5_BLQ) -> legenda no MATA410 padrão para pedidos encerrados
+	cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. Empty(C5_NOTA) .And. C5_BLQ == 'Y' "
  	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Endereca a funcao de BROWSE                                  ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -275,12 +277,13 @@ Return
 Static Function Decisao( cApro )
 Local aArea := GetArea()
 Local lRet  := .F.
+Local cUsr  := Alltrim(Substr(cUsuario,7,13))
 
 RECLOCK('SC5',.F.)
 If cApro == "2"
 	SC5->C5_XUSUG	:= __cUserID
 	SC5->C5_XDTAVG	:= DATE()
-	SC5->C5_XOBSG	:= cJust
+	SC5->C5_XOBSG	:= Alltrim(SC5->C5_XOBSG)+DTOC(DATE())+" às "+Time()+" hs"+" - "+"Aprovado por: "+cUsr+" - "+cJust+CHR(10)+CHR(13)
 	SC5->C5_XAVALG	:= "A"
   	SC5->C5_BLQ		:=  Iif( cApro == "2","","Y") 
 
@@ -288,7 +291,7 @@ If cApro == "2"
 	lRet := Iif( SC5->C5_BLQ <> "Y",.T.,.F.) 
 Else
 	SC5->C5_XDTAVG	:= DATE()
-	SC5->C5_XOBSG	:= cJust
+	SC5->C5_XOBSG	:= Alltrim(SC5->C5_XOBSG)+DTOC(DATE())+" às "+Time()+" hs"+" - "+"*REPROVADO* por: "+cUsr+" - "+cJust+CHR(10)+CHR(13)
 	SC5->C5_XAVALG	:= "R"
   	SC5->C5_BLQ		:=  Iif( cApro == "2","","Y") 
 
