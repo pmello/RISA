@@ -48,8 +48,12 @@ If VerSenha(136) .And. VerSenha(137)
 		//cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_BLQ == 'X' "
 		cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. Empty(C5_NOTA) .And. C5_BLQ == 'X'"
 	Else
-		//cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_BLQ == 'X' .And. C5_VEND1 $ " + U_PEGAVEN()
-		cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_VEND1 $ " + U_PEGAVEN() +" .And. Empty(C5_NOTA) .And. C5_BLQ == 'X'"
+		cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. Empty(C5_NOTA) .And. C5_BLQ == 'X'"
+		cVend := U_PEGAVEN()
+		If !Empty(cVend)
+			cCondicao += " .and. C5_VEND1 $ '" + cVend +"' "
+		EndIf
+
 	Endif
  	//旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커
 	//� Endereca a funcao de BROWSE                                  �
@@ -127,13 +131,13 @@ Local cGerente	:= ""
 	DbSelectArea("SA3")
 	SA3->(DBSETORDER(7))
 	IF Dbseek( xfilial("SA3") + __cUserID)
-		cGerente := SA3->A3_COD
+		cGerente := SA3->A3_GEREN //SA3->A3_COD
 	ENDIF
 	SA3->(DBSETORDER(1))
 	SA3->( DbGoTop() )
 	While ! SA3->(EOF())
 		If SA3->A3_GEREN == cGerente
-			cSQL += "'" + AllTrim(SA3->A3_COD) + "'|"
+			cSQL += "" + AllTrim(SA3->A3_COD) + "|"
 		Endif
 		SA3->( DbSkip() )
 	EndDo

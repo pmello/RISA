@@ -55,7 +55,13 @@ If VerSenha(136) .And. VerSenha(137)
 	//cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_BLQ == 'Y' "
 	//cCondicao := "C5_FILIAL ==''"+xFilial("SC5")+"'"
 	//!Empty(C5_NOTA).Or.C5_LIBEROK=='E' .And. Empty(C5_BLQ) -> legenda no MATA410 padrão para pedidos encerrados
-	cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. Empty(C5_NOTA) .And. (C5_BLQ == 'Y' .or. C5_XAVALG <> '')"
+
+//Alterado por Emerson dia 14/10/2020 - troquei a regra do campo C5_NOTA pelo C5_LIBEROK
+//quando um PV esta totalmente liberado já gerou SC9 então nao pode ser Reprovado por Garantia
+//quando um PV esta faturado o C5_LIBEROK fica igual a Sim
+//	cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. Empty(C5_NOTA) .And. (C5_BLQ == 'Y' .or. C5_XAVALG <> '')"
+	cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. Empty(C5_LIBEROK) .And. (C5_BLQ == 'Y' .or. C5_XAVALG <> '')"
+
  	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ	ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Endereca a funcao de BROWSE                                  ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
