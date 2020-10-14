@@ -30,7 +30,7 @@ If ExistBlock("xMTASF2")
 EndIf
 
 // Chamadas de outros modulos que nao utilizam as regras de precos e descontos
-If ! U_USAREGRA()
+If U_USAREGRA() //Caso pertença há algum modulo vertical o retorno é .F. e não executa os dados da Transportadora
     If ExistBlock("GRVMOTORIS")
         ExecBlock( "GRVMOTORIS", .F., .F.)//Grava dados do Motorista para impressão da Danfe
     Endif

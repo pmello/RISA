@@ -55,8 +55,8 @@ If VerSenha(136) .And. VerSenha(137)
 	//cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_BLQ == 'Y' "
 	//cCondicao := "C5_FILIAL ==''"+xFilial("SC5")+"'"
 	//!Empty(C5_NOTA).Or.C5_LIBEROK=='E' .And. Empty(C5_BLQ) -> legenda no MATA410 padrЦo para pedidos encerrados
-	cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. Empty(C5_NOTA) .And. C5_BLQ == 'Y' "
- 	//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+	cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. Empty(C5_NOTA) .And. (C5_BLQ == 'Y' .or. C5_XAVALG <> '')"
+ 	//здддддддддддддддддддддддддддд	дддддддддддддддддддддддддддддддддд©
 	//Ё Endereca a funcao de BROWSE                                  Ё
 	//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 	dbSelectArea("SC5")

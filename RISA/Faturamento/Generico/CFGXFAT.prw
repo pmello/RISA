@@ -1,5 +1,7 @@
 #INCLUDE "TOTVS.CH"
 #INCLUDE "colors.ch"
+#INCLUDE "TBICONN.CH"
+
 /*/
 
 {Protheus.doc} CFGXFAT
@@ -398,7 +400,7 @@ Else
 EndIf
 
 RestArea(aArea)
-
+//   15,00  <  14,50
 If nPrcVen < nCustoMrk
     MsgStop("O valor minimo de venda deve ser maior ou igual ao valor de custo + índice markup, sendo R$" + TRANSFORM(nCustoMrk,"@E 999,999.99") + " !")
 ELSE
@@ -783,6 +785,13 @@ If lEmailOK
 EndIf
 
 SC5->C5_BLQ := cBloq
+
+//Limpa variáveis de aprovações anteriores visto que pode ser uma alteração de pedido e vai gerar novo bloqueio
+SC5->C5_XDTAVAL := CTOD("")
+SC5->C5_XAVAL   := ""
+SC5->C5_XDTAVG  := CTOD("")
+SC5->C5_XAVALG  := ""
+
 MsUnlock()
 
 RestArea(aArea)
@@ -995,21 +1004,69 @@ Endif
 Return
 
 //Grava informações do motorista na SF2 para impressão em DANFE atraves do PE da Nota
+//Dados Transportador
 //Ponto de entrada SF2460I
 //Conteudo usado em PE01NFESEFAZ
 //Ajustado Emerson Natali
 User Function GRVMOTORIS()
 
-Local cTitulo   := "Dados do Motorista"
+Local cTitulo   := "Dados do Transportador"
+
+Private cCodTrans   := Space( TamSX3("A4_COD")[1] )   // Código Transportadora (SA4)
+Private cNomTrans   := Space( TamSX3("A4_NOME")[1] )  // Nome da Transportadora (SA4)
+Private cCNPJTrans  := Space( TamSX3("A4_CGC")[1] )  // CNPJ da Transportadora (SA4)
+Private cEndTrans   := Space( TamSX3("A4_END")[1] )  // Endereço da Transportadora (SA4)
+
+Private cPlaca   := Space( TamSX3("DA4_NOME")[1] )  // Placa veiculo
+Private cUFVei   := Space( TamSX3("DA4_NOME")[1] )  // Placa veiculo
 
 Private cMotor  := Space( TamSX3("DA4_COD")[1] )   // Código do Motorista
 Private cNmMotor:= Space( TamSX3("DA4_NOME")[1] )  // Nome do Veículo
+Private cCPFMotor:= Space( TamSX3("DA4_NOME")[1] )  // CPF do Motorista
+Private cRGMotor:= Space( TamSX3("DA4_NOME")[1] )  // RG do Motorista
+
+Private cEspecie:= Space( TamSX3("DA4_NOME")[1] )  // Especie
+Private cMarca:= Space( TamSX3("DA4_NOME")[1] )  // Marca
+Private cVolume:= Space( TamSX3("DA4_NOME")[1] )  // Volume
+Private cPesoB:= Space( TamSX3("DA4_NOME")[1] )  // Peso Bruto
+Private cPesoL:= Space( TamSX3("DA4_NOME")[1] )  // Peso Liquido
+
 
 DEFINE MSDIALOG oDlg TITLE cTitulo  OF oMainWnd PIXEL FROM 040,040 TO 430,1200
 
-@ 066, 009 SAY   oSay3    PROMPT "Motorista"      SIZE 043, 007 PIXEL OF oDlg //FONT oBold COLORS 0, 12632256
-@ 064, 040 MSGET oMotor   VAR    cMotor           SIZE 043, 010 PIXEL OF oDlg When .T.   F3 "DA4" VALID ValMotor( cMotor )
-@ 064, 100 MSGET oNMMtor  VAR    cNMMotor         SIZE 080, 010 PIXEL OF oDlg When .F.
+@ 020, 009 SAY   oSay3    PROMPT "Cod.Transp"      SIZE 043, 007 PIXEL OF oDlg
+@ 018, 040 MSGET oCodTrans   VAR    cCodTrans      SIZE 043, 010 PIXEL OF oDlg When .T.   F3 "SA4" VALID ValMotor( "SA4",cCodTrans )
+@ 018, 100 MSGET oNomTrans  VAR    cNomTrans       SIZE 080, 010 PIXEL OF oDlg When .F.
+@ 020, 250 SAY   oSay3    PROMPT "CNPJ/CPF.:"      SIZE 043, 007 PIXEL OF oDlg
+@ 018, 300 MSGET oCNPJTrans  VAR    cCNPJTrans       SIZE 080, 010 PIXEL OF oDlg When .F.
+
+@ 040, 009 SAY   oSay3    PROMPT "End.Trans.:"      SIZE 043, 007 PIXEL OF oDlg
+@ 038, 040 MSGET oEndTrans  VAR    cEndTrans       SIZE 080, 010 PIXEL OF oDlg When .F.
+
+@ 060, 009 SAY   oSay3    PROMPT "Placa"      SIZE 043, 007 PIXEL OF oDlg
+@ 058, 040 MSGET oPlaca  VAR    cPlaca       SIZE 080, 010 PIXEL OF oDlg When .T.
+@ 060, 150 SAY   oSay3    PROMPT "UF Veiculo :"      SIZE 043, 007 PIXEL OF oDlg
+@ 058, 180 MSGET oUFVei  VAR    cUFVei       SIZE 080, 010 PIXEL OF oDlg When .T.
+
+@ 080, 009 SAY   oSay3    PROMPT "Motorista"      SIZE 043, 007 PIXEL OF oDlg
+@ 078, 040 MSGET oMotor   VAR    cMotor           SIZE 043, 010 PIXEL OF oDlg When .T.   F3 "DA4" VALID ValMotor( "DA4",cMotor )
+@ 078, 100 MSGET oNMMtor  VAR    cNMMotor         SIZE 080, 010 PIXEL OF oDlg When .F.
+@ 080, 220 SAY   oSay3    PROMPT "CPF Mot.:"      SIZE 043, 007 PIXEL OF oDlg
+@ 078, 250 MSGET oCPFMotor  VAR    cCPFMotor       SIZE 080, 010 PIXEL OF oDlg When .T.
+@ 080, 350 SAY   oSay3    PROMPT "RG Mot.:"      SIZE 043, 007 PIXEL OF oDlg
+@ 078, 400 MSGET oRGMotor  VAR    cRGMotor       SIZE 080, 010 PIXEL OF oDlg When .T.
+
+@ 110, 009 SAY   oSay3    PROMPT "Especie"      SIZE 043, 007 PIXEL OF oDlg
+@ 108, 040 MSGET oEspecie  VAR    cEspecie       SIZE 080, 010 PIXEL OF oDlg When .T.
+@ 110, 130 SAY   oSay3    PROMPT "Marca"      SIZE 043, 007 PIXEL OF oDlg
+@ 108, 155 MSGET oMarca  VAR    cMarca       SIZE 080, 010 PIXEL OF oDlg When .T.
+@ 110, 250 SAY   oSay3    PROMPT "Volume"      SIZE 043, 007 PIXEL OF oDlg
+@ 108, 290 MSGET oVolume  VAR    cVolume       SIZE 080, 010 PIXEL OF oDlg When .T.
+
+@ 130, 009 SAY   oSay3    PROMPT "Peso Bruto"      SIZE 043, 007 PIXEL OF oDlg
+@ 128, 040 MSGET oPesoB  VAR    cPesoB       SIZE 080, 010 PIXEL OF oDlg When .T.
+@ 130, 130 SAY   oSay3    PROMPT "Peso Liquido"      SIZE 043, 007 PIXEL OF oDlg
+@ 128, 180 MSGET oPesoL  VAR    cPesoL       SIZE 080, 010 PIXEL OF oDlg When .T.
 
 @ 179, 531 BUTTON oButton1 PROMPT "Confirma"      SIZE 037, 012 OF oDlg ACTION (GravaMot(),oDlg:End()) PIXEL
 
@@ -1021,10 +1078,30 @@ Return
 //essas informações serão usadas na impressão da DANFE atraves do PE - PE01NFESEFAZ
 Static Function GravaMot
 
+//Local cMensDadTransp := ""
+
+//Local cCodTrans           // Código Transportadora (SA4)
+//Local cNomTrans           // Nome da Transportadora (SA4)
+//Local cCNPJTrans          // CNPJ da Transportadora (SA4)
+//Local cEndTrans           // Endereço da Transportadora (SA4)
+//Local cPlaca              // Placa veiculo
+//Local cUFVei              // Placa veiculo
+//Local cMotor              // Código do Motorista
+//Local cNmMotor            // Nome do Veículo
+//Local cCPFMotor           // CPF do Motorista
+//Local cRGMotor           // RG do Motorista
+//Local cEspecie           // Especie
+//Local cMarcap           // Marca
+//Local cVolume           // Volume
+//Local cPesoB           // Peso Bruto
+//Local cPesoL           // Peso Liquido
+
 /*
+
+cMensDadTransp
+
 If RecLock("SF2",.F.)
-    SF2->F2_XCODMOT     := cMotor
-    SF2->F2_XNOMMOT     := cNMMotor
+    SF2->F2_XDAD     := cMotor
     SF2->()MsUnLock()
 EndIf
 */
@@ -1032,14 +1109,67 @@ EndIf
 Return
 
 // Valida Codigo do motorista
-Static Function ValMotor( _cCodigo )
+Static Function ValMotor( _cAlias, _cCodigo )
 Local lRet := .F.
 
-DbSelectArea("DA4")
-DbSetOrder(1)
-If DbSeek( xFILIAL("DA4") + _cCodigo )
-    cNmMotor := DA4->DA4_NOME  // Nome do Motorista
-    lRet     := .T.
-Endif
+Default _cAlias := Nil
+
+If _cAlias = "SA4" //Transportadora
+    DbSelectArea("SA4")
+    DbSetOrder(1)
+    If DbSeek( xFILIAL("SA4") + _cCodigo )
+        cNomTrans  := SA4->A4_NOME  // Nome da Transportadora
+        cCNPJTrans := SA4->A4_CGC  // CNPJ da Transportadora
+        cEndTrans  := SA4->A4_END  // Endereço da Transportadora
+        lRet     := .T.
+    Endif
+ElseIf _cAlias = "DA4" //Transportadora
+    DbSelectArea("DA4")
+    DbSetOrder(1)
+    If DbSeek( xFILIAL("DA4") + _cCodigo )
+        cNmMotor := DA4->DA4_NOME  // Nome do Motorista
+        lRet     := .T.
+    Endif
+EndIf
 
 Return( lRet )
+
+//Impressao do Boleto atraves da DANFE
+//Chamado no final da DANFEII e DANFEIII
+User Function ImpBoleto(mv_par01, mv_par02, mv_par03,mv_par04)  // parametro - NOTA DE | NOTA ATE | SERIE | TP.OPERAÇÃO (E-1/S-2)
+
+Local aArea	:= GetArea()
+
+If mv_par04 == 2 //Somente para Nota de Saida
+	If cFilAnt $ SuperGetMV("FS_BOLFIL ",.T.,"")
+        cAliasSF2 := GetNextAlias()
+ 		BeginSql Alias cAliasSF2
+			SELECT *
+			FROM %Table:SF2% SF2
+                INNER JOIN %Table:SE1% SE1 ON SE1.D_E_L_E_T_ = '' 
+                AND SE1.E1_FILIAL = SF2.F2_FILIAL 
+                AND SE1.E1_PREFIXO = SF2.F2_SERIE 
+                AND SE1.E1_NUM = SF2.F2_DOC
+			WHERE
+			SF2.F2_FILIAL = %Exp:cFilAnt% AND
+			SF2.F2_SERIE = %Exp:mv_par03% AND 
+			SF2.F2_DOC BETWEEN %Exp:mv_par01% AND %Exp:mv_par02% AND
+            SF2.F2_CHVNFE <> '' AND 
+            SF2.%NotDel%
+			ORDER BY SF2.F2_SERIE, SF2.F2_DOC
+		EndSql
+
+        If (cAliasSF2)->(!Eof())
+            If MsgYesNo("Deseja imprimir o Boleto Bancário ?","Boleto")
+                While (cAliasSF2)->(!Eof())
+                    aParam := {.T., (cAliasSF2)->(F2_DOC), mv_par02, mv_par03} // parametro - .t. (DANFE no multibol) | Nota de | Nota ate | serie 
+                    ExecBlock( "MULTIBOL", .F., .F.,aParam) //Impressão do Boleto
+                    (cAliasSF2)->(DbSkip())
+                EndDo
+            EndIf
+        Endif
+	EndIf
+EndIf
+
+RestArea(aArea)
+Return 

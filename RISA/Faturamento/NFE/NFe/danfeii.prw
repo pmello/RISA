@@ -176,10 +176,9 @@ Else
 
 	If lBolDanfe
 		If ExistBlock("MULTIBOL") //Verifica a existencia do programa compilado. Fonte MGFFIN06.PRW
-			If MsgYesNo("Deseja imprimir o Boleto Bancário ?","Boleto")
-				aParam := {.T., mv_par01, mv_par02, mv_par03} // parametro .t. DANFE no multibol e Nota de - ate e serie 
-				ExecBlock( "MULTIBOL", .F., .F.,aParam) //Impressão do Boleto 
-			Endif
+			If ExistBlock("ImpBoleto") //chamado motor CFGXFAT
+				u_ImpBoleto(mv_par01, mv_par02, mv_par03, mv_par04) // parametro - .t. (DANFE no multibol) |  Nota de | Nota ate | serie
+			EndIf
 		EndIF
 	EndIf
 
@@ -1728,7 +1727,7 @@ For nZ := 1 To nLenDet
 			nVTotal;
 		})
 	Endif
-/*	// Milton - 03/09/2020
+
 	// Tramento quando houver diferença entre as unidades uCom e uTrib ( SEFAZ MT )
 	If ( oDet[nX]:_Prod:_uTrib:TEXT <> oDet[nX]:_Prod:_uCom:TEXT )
 
@@ -1781,7 +1780,7 @@ For nZ := 1 To nLenDet
 		endif
 
 	Endif
-*/	// Milton - 03/09/2020
+
 
 	cAuxItem := AllTrim(SubStr(oDet[nX]:_Prod:_cProd:TEXT,nMaxCod+1))
 	cAux     := AllTrim(SubStr(NoChar(oDet[nX]:_Prod:_xProd:TEXT,lConverte),(nMaxDes+1)))

@@ -45,11 +45,11 @@ If VerSenha(136) .And. VerSenha(137)
 	dbSelectArea("SC5")
 	dbSetOrder(1)
     If __cUserId $ GetMV('FS_GERMAST',,"000000")
-		cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_BLQ == 'X' "
-		//cCondicao := ""
+		//cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_BLQ == 'X' "
+		cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. Empty(C5_NOTA) .And. C5_BLQ == 'X'"
 	Else
-		cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_BLQ == 'X' .And. C5_VEND1 $ " + U_PEGAVEN()
-		//cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_VEND1 $ " + U_PEGAVEN()
+		//cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_BLQ == 'X' .And. C5_VEND1 $ " + U_PEGAVEN()
+		cCondicao := "C5_FILIAL =='"+xFilial("SC5")+"' .And. C5_VEND1 $ " + U_PEGAVEN() +" .And. Empty(C5_NOTA) .And. C5_BLQ == 'X'"
 	Endif
  	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Endereca a funcao de BROWSE                                  ³
@@ -292,6 +292,7 @@ Static Function Decisao( cApro )
 Local aArea := GetArea()
 Local lRet  := .F.
 Local cBloq	:= ""
+Local cUsr  := Alltrim(Substr(cUsuario,7,13))
 
 	If SC5->C5_TIPO == "N"
 		If nTotal > GetMV('FS_VLRGAR',,0)
@@ -303,7 +304,7 @@ Local cBloq	:= ""
     	  	RECLOCK('SC5',.F.)
 			// Altera o C5_BLQ
 			SC5->C5_XDTAVAL	:= DATE()
-			SC5->C5_XOBS	:= cJust
+			SC5->C5_XOBS 	:= Alltrim(SC5->C5_XOBSG)+DTOC(DATE())+" às "+Time()+" hs"+" - "+"Aprovado por: "+cUsr+" - "+cJust+CHR(10)+CHR(13)
 			SC5->C5_XAVAL	:= "A"
     	  	SC5->C5_BLQ 	:= Iif( cApro == "2",cBloq,"X") 
     	  	MsgInfo("Pedido " + SC5->C5_NUM + " Aprovado com Sucesso!")
@@ -315,7 +316,7 @@ Local cBloq	:= ""
 		RECLOCK('SC5',.F.)
 
 		SC5->C5_XDTAVAL	:= DATE()
-		SC5->C5_XOBS	:= cJust
+		SC5->C5_XOBS	:= Alltrim(SC5->C5_XOBSG)+DTOC(DATE())+" às "+Time()+" hs"+" - "+"*REPROVADO* por: "+cUsr+" - "+cJust+CHR(10)+CHR(13)
 		SC5->C5_XAVAL	:= "R"
 		SC5->(MSUNLOCK())
    		DBCloseArea()
