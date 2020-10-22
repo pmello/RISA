@@ -333,18 +333,16 @@ Local sMoeda	:= MV_SIMB1
 	cQuery += " SZC.ZC_DESMAX AS RB_DESMAX, "							+ ENTER
 	cQuery += " CONCAT(SB1.B1_GRUPO,' - ',SBM.BM_DESC) AS RB_GRUPO "	+ ENTER
 	cQuery += " FROM " + RetSQLName("SC6") + " SC6 "					+ ENTER
-	cQuery += " INNER JOIN " + RetSQLName("SC5") + " SC5 ON SC5.D_E_L_E_T_ <> '*' AND SC5.C5_NUM = SC6.C6_NUM "		+ ENTER
-	cQuery += " INNER JOIN " + RetSQLName("SB1") + " SB1 ON SB1.D_E_L_E_T_ <> '*' AND SB1.B1_COD = SC6.C6_PRODUTO "	+ ENTER
-	cQuery += " LEFT  JOIN " + RetSQLName("DA1") + " DA1 ON DA1.D_E_L_E_T_ <> '*' AND DA1.DA1_CODPRO = SC6.C6_PRODUTO " + ENTER
-	cQuery += " 						                AND DA1_CODTAB = SC5.C5_TABELA "							+ ENTER
-	cQuery += " LEFT JOIN " + RetSQLName("SB2") + " SB2 ON SB2.D_E_L_E_T_ <> '*' AND SB2.B2_COD = SC6.C6_PRODUTO "	+ ENTER
-	cQuery += " LEFT JOIN " + RetSQLName("SBZ") + " SBZ ON SBZ.D_E_L_E_T_ <> '*' AND SBZ.BZ_COD = SC6.C6_PRODUTO "	+ ENTER
-	cQuery += " LEFT JOIN " + RetSQLName("SZC") + " SZC ON SZC.D_E_L_E_T_ <> '*' AND SC5.C5_VEND1 = SZC.ZC_VEND "	+ ENTER
-	cQuery += " 						                AND SZC.ZC_GRPROD = SB1.B1_GRUPO "							+ ENTER
-	cQuery += " LEFT JOIN " + RetSQLName("SBM") + " SBM ON SBM.D_E_L_E_T_ <> '*' AND SBM.BM_GRUPO = SZC.ZC_GRPROD " + ENTER
+	cQuery += " INNER JOIN " + RetSQLName("SC5") + " SC5 ON SC5.D_E_L_E_T_ <> '*' AND SC5.C5_FILIAL = '"+xFilial("SC5")+ "' AND SC5.C5_NUM = SC6.C6_NUM " + ENTER
+	cQuery += " INNER JOIN " + RetSQLName("SB1") + " SB1 ON SB1.D_E_L_E_T_ <> '*' AND SB1.B1_FILIAL = '"+xFilial("SB1")+ "' AND SB1.B1_COD = SC6.C6_PRODUTO "	+ ENTER
+	cQuery += " LEFT  JOIN " + RetSQLName("DA1") + " DA1 ON DA1.D_E_L_E_T_ <> '*' AND DA1.DA1_FILIAL = '"+xFilial("DA1")+"' AND DA1.DA1_CODPRO = SC6.C6_PRODUTO AND DA1_CODTAB = SC5.C5_TABELA " + ENTER
+	cQuery += " LEFT  JOIN " + RetSQLName("SB2") + " SB2 ON SB2.D_E_L_E_T_ <> '*' AND SB2.B2_FILIAL = '"+xFilial("SB2")+ "' AND SB2.B2_COD = SC6.C6_PRODUTO AND SB2.B2_LOCAL = SC6.C6_LOCAL "	+ ENTER
+	cQuery += " LEFT  JOIN " + RetSQLName("SBZ") + " SBZ ON SBZ.D_E_L_E_T_ <> '*' AND SBZ.BZ_FILIAL = '"+xFilial("SBZ")+ "' AND SBZ.BZ_COD = SC6.C6_PRODUTO "	+ ENTER
+	cQuery += " LEFT  JOIN " + RetSQLName("SZC") + " SZC ON SZC.D_E_L_E_T_ <> '*' AND SZC.ZC_FILIAL = '"+xFilial("SZC")+ "' AND SC5.C5_VEND1 = SZC.ZC_VEND AND SZC.ZC_GRPROD = SB1.B1_GRUPO " + ENTER
+	cQuery += " LEFT  JOIN " + RetSQLName("SBM") + " SBM ON SBM.D_E_L_E_T_ <> '*' AND SBM.BM_FILIAL = '"+xFilial("SBM")+ "' AND SBM.BM_GRUPO = SZC.ZC_GRPROD " + ENTER
 	cQuery += " WHERE "													+ ENTER
 	cQuery += " SC6.D_E_L_E_T_ <> '*' "									+ ENTER
-	cQuery += " AND SC6.C6_FILIAL = '" + SC5->C5_FILIAL + "' "			+ ENTER
+	cQuery += " AND SC6.C6_FILIAL = '" + xFilial("SC6") + "' "			+ ENTER
 	cQuery += " AND SC6.C6_NUM = '" + AllTrim(SC5->C5_NUM) + "' "		+ ENTER
 
 	DbUseArea(.T.,"TOPCONN",TcGenQry(,,cQuery),cAliasTRB,.F.,.T.)

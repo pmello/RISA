@@ -28,7 +28,7 @@ User Function XmlMDFeSef(cFil)
 	Local cString		:= ""
 	Local cChvMDFe		:= ""
 	Local aNota			:= {}
-	Local lRespTec  	:= iif(findFunction("getRespTec"),getRespTec("2"),.T.) //0-Todos, 1-NFe, 2-MDFe
+	Local lRespTec  	:= iif(findFunction("getRespTec"),getRespTec("2"),.T.)   //0-Todos, 1-NFe, 2-MDFe
 	Local lTagProduc	:= date() > CTOD("15/06/2019") 
 	Local lPosterior	:= Type("cPoster") == "C" .And. SubStr(cPoster,1,1) == "1"
 	
@@ -87,12 +87,14 @@ User Function XmlMDFeSef(cFil)
 		cString += MDFeLacres()
 		cString += MDFeAutoriz()
 		cString += MDFeInfAdic()
-		if lRespTec .and. lTagProduc .and. existFunc("NfeRespTec")
+		if lRespTec .and. lTagProduc .and. existFunc("NfeRespTec") .and. !lUsaColab
 			cString += NfeRespTec(,58) //Responsavel Tecnico
 		endif
 			
 		cString += '</infMDFe>'
-		cString += MDFeInfMDFeSupl()
+		if !lUsaColab
+			cString += MDFeInfMDFeSupl()
+		endif
 		cString += '</MDFe>'
 	EndIf
 
@@ -343,10 +345,12 @@ Local ctpProp		:= ""
 Local nCapcM3		:= 0
 Local nX			:= 0
 Local lPosterior	:= .F.
+Local lMotorista	:= .F. 
 
 Default aNota		:= {}
 
 lPosterior	:= Len(aNota) >= 10 .And. aNota[10] == "1"
+lMotorista	:= Type('cMotorista') == 'C' .and. !empty(cMotorista)
 
 cString += '<infModal versaoModal="'/*+cVersao*/+'">'
 cString += '<rodo>'
@@ -611,11 +615,22 @@ For nX := 1 To Len(aVeiculo)
 			EndIf
 		EndIf
 
-		If Len(aMotorista[nX]) > 0
+		If lMotorista
+			dbSelectArea("DA4")
+			dbSetOrder(1)
+			MsSeek(xFilial("DA4")+cMotorista)
+
 			cString += '<condutor>'
-			cString +=   '<xNome>' + ConvType(aMotorista[nX][2]) +'</xNome>'
-			cString +=   '<CPF>'   + AllTrim(aMotorista[nX][3]) +'</CPF>'
+			cString +=   '<xNome>' + ConvType(DA4->DA4_NOME) +'</xNome>'
+			cString +=   '<CPF>'   + AllTrim(DA4->DA4_CGC) +'</CPF>'
 			cString += '</condutor>'
+		Else
+			If Len(aMotorista[nX]) > 0
+				cString += '<condutor>'
+				cString +=   '<xNome>' + ConvType(aMotorista[nX][2]) +'</xNome>'
+				cString +=   '<CPF>'   + AllTrim(aMotorista[nX][3]) +'</CPF>'
+				cString += '</condutor>'
+			EndIf
 		EndIf
 		cString +=   '<tpRod>' + alltrim(aVeiculo[nX][13]) + '</tpRod>'
 		cString +=   '<tpCar>' + alltrim(aVeiculo[nX][14]) + '</tpCar>'

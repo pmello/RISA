@@ -42,6 +42,8 @@ Else
 	cNumOrc		:= MV_PAR01
 Endif
 
+//alert("alex")
+
 RptStatus({ |lend| MontaRel()})
 
 /*/
@@ -97,7 +99,7 @@ aDadosEmp  := {SM0->M0_NOMECOM 															  ,; //[1]Nome da Empresa
 				Subs(SM0->M0_CGC,13,2)                                                    ,; //[6]CGC
 				"IE: "+_Cie 															   } //[7]I.E
 
-oPrint:= TMSPrinter():New( "Orçamento de Venda" )
+oPrint:= TMSPrinter():New( "Pedido de Venda" )
 oPrint:SetPortrait() // ou SetLandscape()
 oPrint:StartPage()   // Inicia uma nova página
 oPrint:SetpaperSize(9) // <==== AJUSTE PARA PAPEL a4
@@ -110,17 +112,17 @@ DbSelectArea("SC5")
 DbSetOrder(1)
 DbSeek(xFilial("SC5")+cNumOrc,.T.)
 
-//Somente imprime pedido sem bloqueio de regra de desconto ou regra de garantia
+//Somente imprime pedido sem bloqueio de regra de desconto 
 
-IF SC5->C5_BLQ == "X" .OR. SC5->C5_BLQ == "Y" //Bloqueado X (Regra de Desconto) / Bloqueado Y (Regra Garantia)
-	If SC5->C5_BLQ == "X"
+//IF SC5->C5_BLQ == "X" .OR. SC5->C5_BLQ == "Y" //Bloqueado X (Regra de Desconto) / Bloqueado Y (Regra Garantia)
+IF SC5->C5_BLQ == "X" //Bloqueado X (Regra de Desconto)
+//	If SC5->C5_BLQ == "X"
 		MsgStop("Pedido não pode ser impresso. Pedido bloqueado por: [REGRA DE DESCONTO / COMERCIAL] ")
-	Else
-		MsgStop("Pedido não pode ser impresso. Pedido bloqueado por: [REGRA GARANTIA] ")
-	Endif
+//	Else
+//		MsgStop("Pedido não pode ser impresso. Pedido bloqueado por: [REGRA GARANTIA] ")
+//	Endif
 
 	Return
-
 Endif
 
 aDadosOrc    := {AllTrim(C5_NUM)		            	,;  // [1] Número do orcamento
@@ -149,7 +151,9 @@ aDadosCli   := {SUBSTR(SA1->A1_NOME,1,40)      		 																				,;  // [1]
 				   SA1->A1_CGC                                      																,;  // [7]CGC
 				   SA1->A1_TEL                              																		,;  // [8]FONE
 				   SA1->A1_EMAIL                             																		,;  // [9]EMAIL
-				   SA1->A1_INSCR                             																		}   // [10]IE
+				   SA1->A1_INSCR                             																		,;  // [10]IE
+				   SA1->A1_CONTATO                             																		,;   // [11]CONTATO
+				   SA1->A1_TIPO                             																		}   // [12]TIPO
 
 dbSelectArea("SA3")
 dbSetOrder(1)
@@ -190,6 +194,9 @@ LOCAL cCGC := IIF(SA1->A1_PESSOA == "J",substr(SA1->A1_CGC,1,2) +"."+substr(SA1-
 Local nVlTotal := 0
 Local nValIpi  := 0
 Local nQuante  := 0
+Local lCliente := .T.
+Local nTotPed  := 0
+
 //Parâmetros de TFont.New()
 //1.Nome da Fonte (Windows)
 //3.Tamanho em Pixels
@@ -198,7 +205,8 @@ Local nQuante  := 0
 Private oBrush      := TBrush():New("",4),;
 		oPen     	:= TPen():New(0,5,),;
 		oFont05     := TFont():New('Arial',,5,,.F.,,,,,.F. ),;
-      	oFont07     := TFont():New('Arial',07,07,,.F.,,,,.T.,.F.),;
+      	oFont06     := TFont():New('Arial',06,06,,.F.,,,,.T.,.F.),;
+		oFont07     := TFont():New('Arial',07,07,,.F.,,,,.T.,.F.),;
       	oFont08     := TFont():New('Arial',08,08,,.F.,,,,.T.,.F.),;
       	oFont08n    := TFont():New('Arial',08,08,,.T.,,,,.T.,.F.),;
       	oFont09     := TFont():New('Arial',09,09,,.T.,,,,.T.,.F.),;
@@ -231,207 +239,315 @@ If PswSeek(_nomeuser,.T.)
    _cNomecomp := aRetUser[1,04]
 Endif
 
+
 DbSelectArea("SC6")
 DbSetOrder(1)
-DbSeek(xFilial("SC6")+cNumOrc,.T.)
-//Alert(nLinha)
+If DbSeek(xFilial("SC6")+cNumOrc,.T.)
+	MaFisEnd()
+	MaFisIni(;
+		IIF(lCliente,aDadosOrc[4],),;  // 1-Codigo Cliente/Fornecedor
+		IIF(lCliente,aDadosOrc[5],),; // 2-Loja do Cliente/Fornecedor
+		"C",;	       // 3-C:Cliente , F:Fornecedor
+		"N",;          // 4-Tipo da NF
+		IIF(lCliente,aDadosCli[12],),; // 5-Tipo do Cliente/Fornecedor
+		,;             // 6-Relacao de Impostos que suportados no arquivo
+		,;             // 7-Tipo de complemento
+		,;             // 8-Permite Incluir Impostos no Rodape .T./.F.
+		,;             // 9-Alias do Cadastro de Produtos - ("SBI" P/ Front Loja)
+		,;             // 10-Nome da rotina que esta utilizando a funcao
+		,;		       // 11-Tipo de documento
+		,IIF(lCliente,,)) // 12-Codigo e Loja do Prospect
+//		,IIF(lCliente,,SUS->(US_COD+US_LOJA))) // 12-Codigo e Loja do Prospect
+Endif
+
 
 While SC6->C6_NUM == cNumOrc
 
-If lCabec
-//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³Imprime o cabecalho da empresa. !³
-//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   oPrint:Box(nLinha,0050,nLinha+220,2300)
-   cBitMap := GetSrvProfString("Startpath","")+"DANFE01.bmp"
-   oPrint:SayBitmap(nLinha+10,070,cBitMap,500,200)			// Imprime logo da Empresa: comprimento X altura
+	If lCabec
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Imprime o cabecalho da empresa. !³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		oPrint:Box(nLinha,0050,nLinha+220,2300)
+		cBitMap := GetSrvProfString("Startpath","")+"DANFE01.bmp"
+		oPrint:SayBitmap(nLinha+10,070,cBitMap,500,200)			// Imprime logo da Empresa: comprimento X altura
 
-   oPrint:Say(nLinha+10,600,AllTrim(Upper(aDadosEmp[1])),oFont12)
-   oPrint:Say(nLinha+50,600,AllTrim(aDadosEmp[2]),oFont11)
-   oPrint:Say(nLinha+90,600,AllTrim(aDadosEmp[3]),oFont11)
-   oPrint:Say(nLinha+130,600,aDadosEmp[6]+" "+aDadosEmp[7],oFont11)
-   oPrint:Say(nLinha+170,600,AllTrim(aDadosEmp[5]),oFont12)
+		oPrint:Say(nLinha+10,600,AllTrim(Upper(aDadosEmp[1])),oFont12)
+		oPrint:Say(nLinha+50,600,AllTrim(aDadosEmp[2]),oFont11)
+		oPrint:Say(nLinha+90,600,AllTrim(aDadosEmp[3]),oFont11)
+		oPrint:Say(nLinha+130,600,aDadosEmp[6]+" "+aDadosEmp[7],oFont11)
+		oPrint:Say(nLinha+170,600,AllTrim(aDadosEmp[5]),oFont12)
 
-   // imprime dados vendedor e orcamento no cabeçalho
-   oPrint:Say(nLinha+010,1620,"Emissão: ",oFont10a)
-   oPrint:Say(nLinha+010,1900,DTOC(aDadosOrc[2]),oFont10a)
-   oPrint:Say(nLinha+050,1620,"Vendedor: ",oFont10a)
-   oPrint:Say(nLinha+050,1900,cNomVen,oFont10a)
-   oPrint:Say(nLinha+090,1620,"Orçamento: ",oFont10a)
-   oPrint:Say(nLinha+090,1900,aDadosOrc[1],oFont10a)
+		// imprime dados vendedor e orcamento no cabeçalho
+		oPrint:Say(nLinha+010,1620,"Emissão...: ",oFont10a)
+		oPrint:Say(nLinha+010,1900,DTOC(aDadosOrc[2]),oFont10a)
+		oPrint:Say(nLinha+050,1620,"Vendedor..: ",oFont10a)
+		oPrint:Say(nLinha+050,1900,cNomVen,oFont10a)
+		oPrint:Say(nLinha+090,1620,"No. Pedido: ",oFont10a)
+		oPrint:Say(nLinha+090,1900,aDadosOrc[1],oFont10a)
 
-//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³Titulo do Relatorio³
-//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   If SC6->C6_TES == '506'
-   oPrint:Say(nLinha+250,800,OemToAnsi('PEDIDO DE ASSITÊNCIA: ')+ aDadosOrc[11],oFont22)
-   Elseif SC6->C6_TES $ "507/508"
-   oPrint:Say(nLinha+250,800,OemToAnsi('PEDIDO DE BONIFICAÇÃO: ')+ aDadosOrc[11],oFont22)
-   Else
-   oPrint:Say(nLinha+250,800,OemToAnsi('PEDIDO DE VENDA: ')+ aDadosOrc[11],oFont22)
-   Endif
-//ÚÄÄÄÄÄÄÄÄÄÄ¿
-//³Cliente   ³
-//ÀÄÄÄÄÄÄÄÄÄÄÙ
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Titulo do Relatorio³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If SC6->C6_TES == '506'
+				oPrint:Say(nLinha+250,800,OemToAnsi('PEDIDO DE ASSITÊNCIA')+ aDadosOrc[11],oFont22)
+		Elseif SC6->C6_TES $ "507/508"
+				oPrint:Say(nLinha+250,800,OemToAnsi('PEDIDO DE BONIFICAÇÃO')+ aDadosOrc[11],oFont22)
+		Else
+				oPrint:Say(nLinha+250,800,OemToAnsi('PEDIDO DE VENDA')+ aDadosOrc[11],oFont22)
+		Endif
+		//ÚÄÄÄÄÄÄÄÄÄÄ¿
+		//³Cliente   ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÙ
 
-   nLinha += 345 // 395
+		nLinha += 345 // 395
 
-   oPrint:Box(nLinha,050,nLinha+220,2300)
-   oPrint:Say(nLinha+15,0070,OemToAnsi('Cliente   :'),oFont12)
-   oPrint:Say(nLinha+15,0450,AllTrim(aDadosCli[1]) + ' - ('+AllTrim(aDadosCli[2])+') - '+cCGC,oFont13)
-   oPrint:Say(nLinha+065,0070,OemToAnsi('Endereço:'),oFont12)
-   oPrint:Say(nLinha+065,0450,Alltrim(aDadosCli[3]),oFont11)
-   oPrint:Say(nLinha+065,1500,OemToAnsi(' - IE:'),oFont12)
-   oPrint:Say(nLinha+065,1600,aDadosCli[10],oFont11)
-   oPrint:Say(nLinha+115,0070,OemToAnsi('Município/U.F.:'),oFont12)
-   oPrint:Say(nLinha+115,0450,AllTrim(aDadosCli[4])+'/'+AllTrim(aDadosCli[5]),oFont11)
-   oPrint:Say(nLinha+115,1150,OemToAnsi('Cep:'),oFont12)
-   oPrint:Say(nLinha+115,1320,TransForm(aDadosCli[6],'@R 99.999-999'),oFont11)
-   oPrint:Say(nLinha+165,0070,OemToAnsi('Fone:'),oFont12)
-   oPrint:Say(nLinha+165,0450,ALLTRIM(aDadosCli[8]),oFont11)
-   oPrint:Say(nLinha+165,1150,OemToAnsi('Email:'),oFont12)
-   oPrint:Say(nLinha+165,1320,ALLTRIM(aDadosCli[9]),oFont11)
+		oPrint:Box(nLinha,050,nLinha+220,2300)
+		oPrint:Say(nLinha+15,0070,OemToAnsi('Cliente   :'),oFont12)
+		oPrint:Say(nLinha+15,0450,AllTrim(aDadosCli[1]) + ' - ('+AllTrim(aDadosCli[2])+') - '+cCGC,oFont13)
+		oPrint:Say(nLinha+065,0070,OemToAnsi('Endereço:'),oFont12)
+		oPrint:Say(nLinha+065,0450,Alltrim(aDadosCli[3]),oFont11)
+		oPrint:Say(nLinha+065,1500,OemToAnsi(' - IE:'),oFont12)
+		oPrint:Say(nLinha+065,1600,aDadosCli[10],oFont11)
+		oPrint:Say(nLinha+115,0070,OemToAnsi('Município/U.F.:'),oFont12)
+		oPrint:Say(nLinha+115,0450,AllTrim(aDadosCli[4])+'/'+AllTrim(aDadosCli[5]),oFont11)
+		oPrint:Say(nLinha+115,1150,OemToAnsi('Cep:'),oFont12)
+		oPrint:Say(nLinha+115,1320,TransForm(aDadosCli[6],'@R 99.999-999'),oFont11)
+		oPrint:Say(nLinha+165,0070,OemToAnsi('Fone:'),oFont12)
+		oPrint:Say(nLinha+165,0450,ALLTRIM(aDadosCli[8]),oFont11)
+		oPrint:Say(nLinha+165,1150,OemToAnsi('Email:'),oFont12)
+		oPrint:Say(nLinha+165,1320,ALLTRIM(aDadosCli[9]),oFont11)
+		oPrint:Say(nLinha+165,1750,OemToAnsi('Contato:'),oFont12)
+		oPrint:Say(nLinha+165,1920,ALLTRIM(aDadosCli[11]),oFont11)   
 
- //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
- //³PRODUTOS      ³
- //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³PRODUTOS      ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-   nLinha += 250  // 645
+		nLinha += 250  // 645
 
-   // box do titulo
-    oPrint:Box(nLinha,050,nLinha+65,2300)
-    oPrint:Say(nLinha+5,0900,OemToAnsi('ITENS DO PEDIDO'),oFont16)
+		// box do titulo
+		oPrint:Box(nLinha,050,nLinha+65,2300)
+		oPrint:Say(nLinha+5,0900,OemToAnsi('ITENS DO PEDIDO'),oFont16)
 
-   //sem os descontos
-    oPrint:Say(nLinha+75,0070,'Item',oFont10a)
- 	oPrint:Say(nLinha+75,0170,'Descrição',oFont10a)
-	oPrint:Say(nLinha+75,1450,'NCM',oFont10a)
-    oPrint:Say(nLinha+75,1700,'Qtde',oFont10a)
-	oPrint:Say(nLinha+75,1840,'Vlr.Unit.',oFont10a)
-	oPrint:Say(nLinha+75,2100,'Vlr.Total',oFont10a)
+		//sem os descontos
+		oPrint:Say(nLinha+75,0070,'Item',oFont10a)
+		oPrint:Say(nLinha+75,0170,'Descrição',oFont10a)
+		//oPrint:Say(nLinha+75,1450,'NCM',oFont10a)
+		oPrint:Say(nLinha+75,1000,'Qtde',oFont10a)
+		oPrint:Say(nLinha+75,1150,'UM',oFont10a)
+		oPrint:Say(nLinha+75,1250,'Vlr.Unit.Tab.',oFont10a)
+		oPrint:Say(nLinha+75,1450,'% Desc.',oFont10a)
+		oPrint:Say(nLinha+75,1650,'Vlr.Desc.',oFont10a)
+		oPrint:Say(nLinha+75,1850,'Vlr.Unit.Li.',oFont10a)	
+		oPrint:Say(nLinha+75,2050,'$',oFont10a)	
+		oPrint:Say(nLinha+75,2170,'Vlr.Total',oFont10a)
 
-    nLinha += 125
+		nLinha += 125
 
-lCabec := .F.
-Endif
-    cUn := POSICIONE("SB1",1,XFILIAL("SB1")+SC6->C6_PRODUTO,"B1_UM")
-    nTotBru := nTotDesc := nTotLiq := 0
-   		//sem os descontos
-	    oPrint:Say(nLinha,0070,SC6->C6_ITEM,oFont10)
-	    oPrint:Say(nLinha,0170,alltrim(SC6->C6_PRODUTO)+"-"+alltrim(SC6->C6_DESCRI),oFont10)
-	    oPrint:Say(nLinha,1450,POSICIONE("SB1",1,XFILIAL("SB1")+SC6->C6_PRODUTO,"B1_POSIPI"),oFont10)
-	    oPrint:Say(nLinha,1700,TransForm(SC6->C6_QTDVEN,'@E 9999'),oFont10)
-	    oPrint:Say(nLinha,1840,TransForm(SC6->C6_PRCVEN,'@E 999,999.99'),oFont10)
-	    oPrint:Say(nLinha,2100,TransForm(SC6->C6_VALOR,'@E 999,999.99'),oFont10)
+		lCabec := .F.
+	Endif
 
- 	    nLinha += 050
- 	    nVlTotal += SC6->C6_VALOR
- 	    nTotDesc += SC6->C6_VALDESC
- 	    nIpi := POSICIONE("SB1",1,XFILIAL("SB1")+SC6->C6_PRODUTO,"B1_IPI")
+	cUn := POSICIONE("SB1",1,XFILIAL("SB1")+SC6->C6_PRODUTO,"B1_UM")
+	nTotBru := nTotDesc := nTotLiq := 0
+	//sem os descontos
+	oPrint:Say(nLinha,0070,SC6->C6_ITEM,oFont10)
+	oPrint:Say(nLinha,0170,alltrim(SC6->C6_PRODUTO)+"-"+alltrim(SC6->C6_DESCRI)	,oFont10)
+	//	    oPrint:Say(nLinha,1450,POSICIONE("SB1",1,XFILIAL("SB1")+SC6->C6_PRODUTO,"B1_POSIPI"),oFont10)
+	oPrint:Say(nLinha,0975,TransForm(SC6->C6_QTDVEN,'@E 999,999')					,oFont10)
+	oPrint:Say(nLinha,1150,SC6->C6_UM											,oFont10)		
+	oPrint:Say(nLinha,1400,TransForm(SC6->C6_PRUNIT,'@E 999,999.99')			,oFont10,,,,1)	    
+	oPrint:Say(nLinha,1550,TransForm(SC6->C6_DESCONT,'@E 999,999.99')			,oFont10,,,,1)		// % desconto
+	oPrint:Say(nLinha,1750,TransForm(SC6->C6_VALDESC,'@E 999,999.99')			,oFont10,,,,1)		// valor do desconto
+	oPrint:Say(nLinha,1950,TransForm(SC6->C6_PRCVEN,'@E 999,999.99')			,oFont10,,,,1)
+	oPrint:Say(nLinha,2050,SC6->C6_MOEDPV										,oFont10)			//Moeda	    
+	oPrint:Say(nLinha,2280,TransForm(SC6->C6_VALOR,'@E 999,999.99')				,oFont10,,,,1)
 
- 	    //-- Toni Aguiar - TOTVS SIGA SERVICE em 29/03/2016
- 	    //-- Só desstaca o IPI, caso não seja uma venda de serviço ou venda para zona franca - CF 6109
- 	    //-- If Posicione("SF4",1,xFilial("SF4")+SC6->C6_TES,"F4_ISS")<>"N" .And. Alltrim(Posicione("SF4",1,xFilial("SF4")+SC6->C6_TES,"F4_CF"))<>"6109"
- 	    If !Alltrim(Posicione("SF4",1,xFilial("SF4")+SC6->C6_TES,"F4_CF"))$"6109/6915/6916"
- 	       nValIpi += SC6->C6_VALOR * nIpi /100
- 	    Endif
- 	    nQuante += SC6->C6_QTDVEN
+	MaFisAdd(;
+		SC6->C6_PRODUTO,; // 1-Codigo do Produto ( Obrigatorio )
+		SC6->C6_TES,;    // 2-Codigo do TES ( Opcional )
+		SC6->C6_QTDVEN,; // 3-Quantidade ( Obrigatorio )
+		SC6->C6_PRCVEN,; // 4-Preco Unitario ( Obrigatorio )
+		0,;               // 5-Valor do Desconto ( Opcional )
+		"",;              // 6-Numero da NF Original ( Devolucao/Benef )
+		"",;              // 7-Serie da NF Original ( Devolucao/Benef )
+		0,;               // 8-RecNo da NF Original no arq SD1/SD2
+		0,;               // 9-Valor do Frete do Item ( Opcional )
+		0,;               // 10-Valor da Despesa do item ( Opcional )
+		0,;               // 11-Valor do Seguro do item ( Opcional )
+		0,;               // 12-Valor do Frete Autonomo ( Opcional )
+		SC6->C6_VALOR,;  // 13-Valor da Mercadoria ( Obrigatorio )
+		0,;               // 14-Valor da Embalagem ( Opiconal )
+		0,;               // 15-RecNo do SB1
+		0)                // 16-RecNo do SF4
+	
+	MaFisRet(,"IT_TOTAL"  )
 
+	nLinha += 050
+	nVlTotal += SC6->C6_VALOR
+	nTotDesc += SC6->C6_VALDESC
+	nIpi := POSICIONE("SB1",1,XFILIAL("SB1")+SC6->C6_PRODUTO,"B1_IPI")
+
+	//-- Toni Aguiar - TOTVS SIGA SERVICE em 29/03/2016
+	//-- Só desstaca o IPI, caso não seja uma venda de serviço ou venda para zona franca - CF 6109
+	//-- If Posicione("SF4",1,xFilial("SF4")+SC6->C6_TES,"F4_ISS")<>"N" .And. Alltrim(Posicione("SF4",1,xFilial("SF4")+SC6->C6_TES,"F4_CF"))<>"6109"
+	If !Alltrim(Posicione("SF4",1,xFilial("SF4")+SC6->C6_TES,"F4_CF"))$"6109/6915/6916"
+		nValIpi += SC6->C6_VALOR * nIpi /100
+	Endif
+
+	nQuante += SC6->C6_QTDVEN
 
 	If nLinha >= 3100
- 	    nLinha += 050
-	    oPrint:Say(nLinha,0100,"Continua...",oFont12)
+		nLinha += 050
+		oPrint:Say(nLinha,0100,"Continua...",oFont12)
 		oPrint:EndPage()
 		oPrint:StartPage()
-	    nLinha := 050
+		nLinha := 050
 		lCabec := .T.
 	EndIf
 
-DbSkip()
+	DbSkip()
 Enddo
 
-	//linha com o valor do frete - incluido 27/11/2012
-    nLinha += 030
-    oPrint:Say(nLinha+125,0100,"VALOR DO FRETE",oFont12a)
-    oPrint:Say(nLinha+125,0670,TransForm(aDadosOrc[9],'@E 999,999.99'),oFont10)
-    oPrint:Say(nLinha+125,1000,"TOTAL QUANTIDADES",oFont12a)
-    oPrint:Say(nLinha+125,1660,TransForm(nQuante,'@E 999,999.99'),oFont10)
-    nLinha += 045
+/*
+	aTotais[1] := TransForm(MaFisRet(,"NF_VALIPI" ),"@E 999,999,999.99")
+	aTotais[2] := TransForm(MaFisRet(,"NF_VALICM" ),"@E 999,999,999.99")
+	aTotais[3] := TransForm(MaFisRet(,"NF_VALSOL" ),"@E 999,999,999.99")
+	aTotais[4] := TransForm(MaFisRet(,"NF_TOTAL"  ),"@E 999,999,999.99")
+*/
 
-    // box fechando os produtos depois da impressao de todos
-    oPrint:Box(710,050,nLinha+125,2300)
+nTotPed := MaFisRet(,"NF_TOTAL")
+nvalicms2 := MaFisRet(,"NF_VALICM")
+ntotsnf := MaFisRet(,"NF_TOTAL")
+MaFisEnd()
 
- //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
- //³TOTAIS      ³
- //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    nLinha += 125
- // box dos totais
-    oPrint:Box(nLinha,050,nLinha+65,2300)
+//alert("TOTAL PEDIDO: "+str(ntotped))
+//alert("TOTAL ICMS: "+str(nvalicms2))
+//alert("TOTAL NF: "+str(ntotsnf))
+
+
+//linha com o valor do frete - incluido 27/11/2012
+nLinha += 030
+oPrint:Say(nLinha+125,0070,"VALOR DO FRETE",oFont12a)
+oPrint:Say(nLinha+125,0570,TransForm(aDadosOrc[9],'@E 999,999.99'),oFont10)
+oPrint:Say(nLinha+125,1000,"TOTAL QUANTIDADES",oFont12a)
+oPrint:Say(nLinha+125,1460,TransForm(nQuante,'@E 999,999.99'),oFont10)
+nLinha += 045
+
+// box fechando os produtos depois da impressao de todos
+oPrint:Box(700,050,nLinha+50,2300)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³TOTAIS      ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+nLinha += 125
+// box dos totais
+oPrint:Box(nLinha-50,050,nLinha+65,2300)
 //    oPrint:Say(nLinha+5,0250,'TOTAIS',oFont12a)
-    oPrint:Say(nLinha+5,0070,"Sub.Total: "+TransForm(nVlTotal,'@E 999,999.99'),oFont12a)
-    oPrint:Say(nLinha+5,0650,"Val IPI: "+TransForm(nValIpi,'@E 999,999.99'),oFont12a)
-    oPrint:Say(nLinha+5,1270,"Desconto: "+TransForm(aDadosOrc[6]+nTotDesc,'@E 999,999.99'),oFont12a)
-    oPrint:Say(nLinha+5,1870,"TOTAL: "+TransForm(aDadosOrc[9]+nValIpi+nVlTotal,'@E 999,999.99'),oFont12a)
+oPrint:Say(nLinha+5,0070,"Sub.Total:     "+TransForm(nVlTotal,'@E 999,999.99'),oFont12a)
+oPrint:Say(nLinha+5,0550,"Val IPI: "+TransForm(nValIpi,'@E 999,999.99'),oFont12a)
+oPrint:Say(nLinha+5,0870,"Desconto: "+TransForm(aDadosOrc[6]+nTotDesc,'@E 999,999.99'),oFont12a)
+oPrint:Say(nLinha+5,1370,"Icms Dispens.: "+TransForm((aDadosOrc[9]+nValIpi+nVlTotal)-nTotPed,'@E 999,999.99'),oFont12a)	
+oPrint:Say(nLinha+5,1900,"TOTAL:     "+TransForm(aDadosOrc[9]+nValIpi+nVlTotal,'@E 999,999.99'),oFont12a)
 
-	_vlrBruto := nVlTotal+aDadosOrc[9]
+_vlrBruto := nVlTotal+aDadosOrc[9]
 
- //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
- //³COND. DE PAGAMENTO ³
- //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    nLinha += 95
-    nLinha2 := nLinha
- // box da cond. pgto
-    oPrint:Box(nLinha,0050,nLinha+65,2300)
-    oPrint:Say(nLinha+5,0900,OemToAnsi('COND. DE PAGAMENTO'),oFont16)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³COND. DE PAGAMENTO ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+nLinha += 95
+//    nLinha2 := nLinha
 
-    oPrint:Say(nLinha+100,1800,'Num. Doc.: '+aDadosOrc[7]+" "+aDadosOrc[8],oFont12a)
+// box da cond. pgto
+oPrint:Box(nLinha,0050,nLinha+65,2300)
+oPrint:Say(nLinha+5,0900,OemToAnsi('COND. DE PAGAMENTO'),oFont16)
+
+oPrint:Say(nLinha+100,1800,'Num. Doc.: '+aDadosOrc[7]+" "+aDadosOrc[8],oFont12a)
 
 // Buscando as formas de pagamento informadas no orçamento
-	dbSelectArea("SE4")
- 	DbSetOrder(1)
- 	DbSeek(xFilial("SE4")+SC5->C5_CONDPAG,.T.)
-		oPrint:Say(nLinha+100,0090,SC5->C5_CONDPAG,oFont10)
-		oPrint:Say(nLinha+100,0390,SE4->E4_DESCRI,oFont10)
-		oPrint:Say(nLinha+100,0690,SE4->E4_FORMA,oFont10)
-	    nLinha += 50
+dbSelectArea("SE4")
+DbSetOrder(1)
+DbSeek(xFilial("SE4")+SC5->C5_CONDPAG,.T.)
+	oPrint:Say(nLinha+100,0090,SC5->C5_CONDPAG,oFont10)
+	oPrint:Say(nLinha+100,0390,SE4->E4_DESCRI,oFont10)
+	oPrint:Say(nLinha+100,0690,SE4->E4_FORMA,oFont10)
+	nLinha += 50
 
- //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
- //³ASSINATURA    ³
- //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    nLinha += 250
-    oPrint:Say(nLinha,0070,OemToAnsi('ASS. Cliente:'),oFont12)
-    oPrint:Say(nLinha,0350,'__________________________________',oFont12n)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ASSINATURA    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-    oPrint:Say(nLinha,1170,OemToAnsi('ASS. Representante:'),oFont12)
-    oPrint:Say(nLinha,1550,'_______________________________',oFont12n)
-    oPrint:Say(nLinha+50,1550,AllTrim(aDadosEmp[1]),oFont08)
+// box fechando cond. pgto
+oPrint:Box(nLinha-050,050,nLinha+100,2300)
 
-    // box fechando cond. pgto com assinaturas
-    oPrint:Box(nLinha2+65,050,nLinha+100,2300)
+// box dados p/ depósito - quadro 01
+oPrint:Box(nLinha+100,0050,nLinha+580,0600)
+oPrint:Say(nLinha+130,0080,OemToAnsi('Dados para depósito')		,oFont16)
+oPrint:Say(nLinha+180,0080,OemToAnsi('Banco do Brasil')			,oFont16)	
+oPrint:Say(nLinha+230,0080,OemToAnsi('AG.: 0895-8')				,oFont16)		
+oPrint:Say(nLinha+280,0080,OemToAnsi('C/C: 3493-2')				,oFont16)			
+oPrint:Say(nLinha+330,0080,OemToAnsi('Cod. Identificador: CPF')	,oFont16)			
+oPrint:Say(nLinha+380,0080,OemToAnsi('Depositante.')			,oFont16)				
 
-    // box RODAPÉ
-    nLinha += 150
-	oPrint:Say(nLinha,0100,"OBS: ",oFont12)
-			nCol := Len(Alltrim(aDadosOrc[10]))
-           If nCol > 140
-			oPrint:Say(nLinha+050,0100,Substr(aDadosOrc[10],1,140),oFont10)
-			nLinha+=50
-	     	oPrint:Say(nLinha+050,0100,Substr(aDadosOrc[10],141),oFont10)
-	       Else
-			oPrint:Say(nLinha+050,0100,aDadosOrc[10],oFont10)
-		   Endif
-	oPrint:Say(nLinha+100,0100,"Data de Solicitação: "+DTOC(SC5->C5_DTSOLIC),oFont10)
-   //	oPrint:Say(nLinha+100,0100,aDadosOrc[13]                              ,oFont10)
-  //	oPrint:Say(nLinha+150,0100,aDadosOrc[14]                              ,oFont10)
+// box dados p/ depósito - quadro 02
+oPrint:Box(nLinha+100,0600,nLinha+580,1650)
+oPrint:Say(nLinha+130,0635,OemToAnsi('Após vencimento, acréscimo de 3% de multa mais 1,8% de juros ao mês.')		,oFont10n)
+oPrint:Say(nLinha+180,0635,OemToAnsi('Nos casos em que o pagamento for realizado por meio de cheque a entrega')		,oFont10)	
+oPrint:Say(nLinha+230,0635,OemToAnsi('do produto está condicionada a compensação bancária do mesmo.')				,oFont10)		
+oPrint:Say(nLinha+280,0635,OemToAnsi('Na hipótese de desistência da compra dos produtos pelo comprador, este')		,oFont10)			
+oPrint:Say(nLinha+330,0635,OemToAnsi('fica sujeito ao pagamento de uma multa não compensatória de 15% (quinze')		,oFont10)			
+oPrint:Say(nLinha+380,0635,OemToAnsi('por cento) sobre o valor deste pedido, sem prejuízo da vendedora cobrar')		,oFont10)				
+oPrint:Say(nLinha+430,0635,OemToAnsi('perdas e danos diretos devidamente comprovados.')		,oFont10)				
 
-    _i:=0
-    _i+=If(!Empty(aDadosOrc[10]), 50, 0)
+// box dados p/ depósito - quadro 03 .
+oPrint:Box(nLinha+100,1650,nLinha+580,2300)
+oPrint:Say(nLinha+130,1660,OemToAnsi('Caro cliente,')		,oFont07)
+oPrint:Say(nLinha+170,1660,OemToAnsi('Para que seja possível agilizarmos seu atendimento, é importante')		,oFont07)	
+oPrint:Say(nLinha+210,1660,OemToAnsi('que seja efetuado o agendamento prévio de cada embarque.')				,oFont07)		
+oPrint:Say(nLinha+260,1660,OemToAnsi('O agendamento deverá ser enviado ao e-mail: comercial@risa.com,')		,oFont07)			
+oPrint:Say(nLinha+310,1660,OemToAnsi('com as informações que seguem abaixo:')		,oFont07)			
+oPrint:Say(nLinha+360,1660,OemToAnsi('- Data do embarque:')		,oFont07)				
+oPrint:Say(nLinha+400,1660,OemToAnsi('- Nome do Motorista:')		,oFont07)				
+oPrint:Say(nLinha+440,1660,OemToAnsi('- Placa do Veículo:')		,oFont07)					
+oPrint:Say(nLinha+480,1660,OemToAnsi('- No. Pedido:')		,oFont07)						
+oPrint:Say(nLinha+520,1660,OemToAnsi('- Produto a ser embarcado:')		,oFont07)							
 
-    nLinha += 100+_i
-	oPrint:Say(nLinha,0100," NÃO É  VALIDO COMO DOCUMENTO FISCAL   " 	    	,oFont12)
-	oPrint:Say(nLinha,1350,"ORÇAMENTO VALIDO ATÉ :"    							,oFont12)
-	oPrint:Say(nLinha,1950, DTOC(aDadosOrc[2] + 3) 	  	         				,oFont15)
-	oPrint:Say(nLinha+050,0100," EXIJA SEMPRE  O DOCUMENTO FISCAL	   " 	    ,oFont10)
+// box observações gerais
+oPrint:Box(nLinha+680,0050,nLinha+1100,2300)
+oPrint:Say(nLinha+680,0900,OemToAnsi('OBSERVAÇÕES GERAIS'),oFont16)
+
+
+nLinha += 1200
+oPrint:Say(nLinha,0070,OemToAnsi('ASS. Cliente:'),oFont12)
+oPrint:Say(nLinha,0350,'__________________________________',oFont12n)
+
+oPrint:Say(nLinha,1170,OemToAnsi('ASS. Representante:'),oFont12)
+oPrint:Say(nLinha,1550,'_______________________________',oFont12n)
+oPrint:Say(nLinha+50,1550,AllTrim(aDadosEmp[1]),oFont08)
+
+
+// box RODAPÉ
+nLinha += 150
+oPrint:Say(nLinha,0100,"OBS: ",oFont12)
+		nCol := Len(Alltrim(aDadosOrc[10]))
+		If nCol > 140
+		oPrint:Say(nLinha+050,0100,Substr(aDadosOrc[10],1,140),oFont10)
+		nLinha+=50
+		oPrint:Say(nLinha+050,0100,Substr(aDadosOrc[10],141),oFont10)
+		Else
+		oPrint:Say(nLinha+050,0100,aDadosOrc[10],oFont10)
+		Endif
+oPrint:Say(nLinha+100,0100,"Data de Solicitação: "+DTOC(SC5->C5_DTSOLIC),oFont10)
+//	oPrint:Say(nLinha+100,0100,aDadosOrc[13]                              ,oFont10)
+//	oPrint:Say(nLinha+150,0100,aDadosOrc[14]                              ,oFont10)
+
+_i:=0
+_i+=If(!Empty(aDadosOrc[10]), 50, 0)
+
+nLinha += 200+_i
+oPrint:Say(nLinha,0100," NÃO É  VALIDO COMO DOCUMENTO FISCAL   " 	    	,oFont12)
+oPrint:Say(nLinha,1350,"ORÇAMENTO VALIDO ATÉ :"    							,oFont12)
+oPrint:Say(nLinha,1950, DTOC(aDadosOrc[2] + 3) 	  	         				,oFont15)
+oPrint:Say(nLinha+050,0100," EXIJA SEMPRE  O DOCUMENTO FISCAL	   " 	    ,oFont10)
 
 oPrint:EndPage() // Finaliza a página
 

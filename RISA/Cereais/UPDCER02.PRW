@@ -27,7 +27,7 @@ Local cCampoUpd		:= ALLTRIM(PARAMIXB)
 //здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 //ЁCaso o campo atual esteja entre os campos da lista, nЦo atualiza definiГУes de obrigatoriedade do mesmoЁ
 //юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
-If cCampoUpd $ cCamposGC
+If cCampoUpd $ cCamposGC .OR. "ZCB_ARG" $ cCampoUpd
 	lAtualiza := .F.
 EndIf
 

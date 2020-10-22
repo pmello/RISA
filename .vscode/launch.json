@@ -17,6 +17,16 @@
 			"args": [],
 			"label": "SIGAMDI",
 			"description": ""
+		},
+		{
+			"args": [],
+			"label": "u_UPDFSW",
+			"description": ""
+		},
+		{
+			"args": [],
+			"label": "SIGA",
+			"description": ""
 		}
 	],
 	"lastProgramExecuted": "SIGAMDI"

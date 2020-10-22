@@ -1,22 +1,24 @@
-#include "protheus.ch"                      
 #include "rwmake.ch"
+#include "protheus.ch"
 
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณMTASF2    บAutor  ณMarcelo Joner       บ Data ณ  15/01/2010 บฑฑ
+ฑฑบPrograma  ณMT240EST   บAutor  ณMarcelo Joner       บ Data ณ 18/06/2020 บฑฑ
 ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
-ฑฑบDesc.     ณ Ponto de entrada utilizado ap๓s o faturamento de documento บฑฑ
-ฑฑบ          ณ de saํda para gravar campos adicionais na tabela SF2.      บฑฑ
+ฑฑบDesc.     ณPonto de entrada utilizado na execu็ใo da funcionalidade de บฑฑ
+ฑฑบ          ณestorno de Mov. Internos Estoque.                           บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Gestใo de Cereais                                          บฑฑ
+ฑฑบUso       ณGestใo de Cereais                                            ฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
 */
-User Function MTASF2()
-  
+User Function MT240EST()
+
+Local lRet		:= .T.
+
 
 //                                            ^
 //                                            |
@@ -25,15 +27,8 @@ User Function MTASF2()
 //ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
 //ณ Especํfico para ser utilizado pelo Gestใo de Cereais 																			  ณ
 //ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
-If ExistBlock("xMTASF2")
-	ExecBlock( "xMTASF2", .F., .F.)
+If lRet .And. ExistBlock("xMT240EST")
+	lRet := ExecBlock("xMT240EST", .F., .F.)
 EndIf
 
-
-// Chamadas de outros modulos que nao utilizam as regras de precos e descontos
-If U_USAREGRA() //Caso perten็a hแ algum modulo vertical o retorno ้ .F. e nใo executa os dados da Transportadora
-    If ExistBlock("GRVMOTORIS")
-        ExecBlock( "GRVMOTORIS", .F., .F.)//Grava dados do Motorista para impressใo da Danfe
-    Endif
-EndIf
-Return .T.
+Return lRet

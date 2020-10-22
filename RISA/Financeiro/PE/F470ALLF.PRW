@@ -10,6 +10,6 @@ User Function F470ALLF
 
 Local lAllFil := ParamIxb[1] //ParamIxb -- variavel do padrão que traz a situação atual das tabelas
 
-lAllFil := .T. //configuração RISA para trazer o Extrato compartilhado por Filial.
+//lAllFil := .T. //configuração RISA para trazer o Extrato compartilhado por Filial.
 
 Return lAllFil

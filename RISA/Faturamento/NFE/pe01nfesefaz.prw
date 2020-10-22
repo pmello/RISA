@@ -180,6 +180,11 @@ If aNota[4] == "1"	// Notas de Saida
 		cMensCli += "R.G. Motor.: " + Alltrim( POSICIONE("SA3",1,xFILIAL("SA3") + SF2->F2_VEND1,"A3_RG") ) + " "
 	Endif
 */
+
+	If !Empty(SF2->F2_MENN2) //campo preenchido 
+		cMensCli += alltrim(SF2->F2_MENN2)
+	EndIf
+	
 Else	// Notas de Entrada
 //Verifica se é Nota de Veiculo SIGAVEI
 // COMECA AQUI

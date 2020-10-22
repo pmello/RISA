@@ -1,22 +1,30 @@
-#include "protheus.ch"                      
 #include "rwmake.ch"
+#include "protheus.ch"
 
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณMTASF2    บAutor  ณMarcelo Joner       บ Data ณ  15/01/2010 บฑฑ
+ฑฑบPrograma  ณSD3240E   บAutor  ณMarcelo Joner       บ Data ณ 18/06/2020  บฑฑ
 ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
-ฑฑบDesc.     ณ Ponto de entrada utilizado ap๓s o faturamento de documento บฑฑ
-ฑฑบ          ณ de saํda para gravar campos adicionais na tabela SF2.      บฑฑ
+ฑฑบDesc.     ณPonto de entrada utilizado na grava็ใo do estorno de Mov.   บฑฑ
+ฑฑบ          ณInternos de Estoque.                                        บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Gestใo de Cereais                                          บฑฑ
+ฑฑบUso       ณGestใo de Cereais                                            ฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
 */
-User Function MTASF2()
-  
+User Function SD3240E()
+
+
+
+
+
+
+
+
+
 
 //                                            ^
 //                                            |
@@ -25,15 +33,8 @@ User Function MTASF2()
 //ฺฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
 //ณ Especํfico para ser utilizado pelo Gestใo de Cereais 																			  ณ
 //ภฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
-If ExistBlock("xMTASF2")
-	ExecBlock( "xMTASF2", .F., .F.)
+If ExistBlock("xSD3240E")
+	ExecBlock("xSD3240E", .F., .F.)
 EndIf
 
-
-// Chamadas de outros modulos que nao utilizam as regras de precos e descontos
-If U_USAREGRA() //Caso perten็a hแ algum modulo vertical o retorno ้ .F. e nใo executa os dados da Transportadora
-    If ExistBlock("GRVMOTORIS")
-        ExecBlock( "GRVMOTORIS", .F., .F.)//Grava dados do Motorista para impressใo da Danfe
-    Endif
-EndIf
-Return .T.
+Return

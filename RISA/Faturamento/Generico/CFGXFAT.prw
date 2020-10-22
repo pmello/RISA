@@ -747,11 +747,16 @@ Local cBloq     := ""
 Local lEmailOK  := .F.
 Local nTotal    := 0
 
+//Somente bloqueia pedidos de vendas que são operação de venda
+If !M->C5_XOPER $ GetMV('FS_OPERVEN',,"01/02/04")
+    Return
+Endif
+
 If Type("l410Auto") == "U" .OR. l410Auto     // Ignora se não identificar a origem do cadastro ou se for um EXECAUTO
     Return    
 Endif
 
-For nLinha := 1 TO Len(aCols) //Vare os itens do Pedido para saber se deve bloquear por Regra de Desconto (gatilho preenche o campo C6_XBLQ)
+For nLinha := 1 TO Len(aCols) //Varre os itens do Pedido para saber se deve bloquear por Regra de Desconto (gatilho preenche o campo C6_XBLQ)
     nTotal += aCols[nLinha,nPosTOT]
     If aCols[nLinha,nPosXBLQ] == "1"
         cBloq   := "X"
@@ -893,9 +898,11 @@ User Function USAREGRA()
 Local lRet  := .T.
 
 // Ignora se não identificar a origem do cadastro ou se for um EXECAUTO
-If Type("l410Auto") == "U" .OR. l410Auto 
-    lRet := .F.   
-Endif
+If !(IsInCallStack("U_MTASF2")) //PE rotina de faturamento (documento de saida)
+    If Type("l410Auto") == "U" .OR. l410Auto 
+        lRet := .F.   
+    Endif
+EndIf
 
 If       IsInCallStack("VEIXA018")      ;   // VEICULOS       - Função que não obriga o preenchimento de campos
     .OR. IsInCallStack("OFIXA100")      ;   // OFICINA        - Função que não obriga o preenchimento de campos
@@ -1017,6 +1024,8 @@ Private cNomTrans   := Space( TamSX3("A4_NOME")[1] )  // Nome da Transportadora 
 Private cCNPJTrans  := Space( TamSX3("A4_CGC")[1] )  // CNPJ da Transportadora (SA4)
 Private cEndTrans   := Space( TamSX3("A4_END")[1] )  // Endereço da Transportadora (SA4)
 
+Private cVeic   := Space( TamSX3("DA4_NOME")[1] )  // Veiculo
+
 Private cPlaca   := Space( TamSX3("DA4_NOME")[1] )  // Placa veiculo
 Private cUFVei   := Space( TamSX3("DA4_NOME")[1] )  // Placa veiculo
 
@@ -1025,12 +1034,19 @@ Private cNmMotor:= Space( TamSX3("DA4_NOME")[1] )  // Nome do Veículo
 Private cCPFMotor:= Space( TamSX3("DA4_NOME")[1] )  // CPF do Motorista
 Private cRGMotor:= Space( TamSX3("DA4_NOME")[1] )  // RG do Motorista
 
-Private cEspecie:= Space( TamSX3("DA4_NOME")[1] )  // Especie
+Private cEspecie:= Space( TamSX3("F2_ESPECI1")[1] )  // Especie
 Private cMarca:= Space( TamSX3("DA4_NOME")[1] )  // Marca
-Private cVolume:= Space( TamSX3("DA4_NOME")[1] )  // Volume
-Private cPesoB:= Space( TamSX3("DA4_NOME")[1] )  // Peso Bruto
-Private cPesoL:= Space( TamSX3("DA4_NOME")[1] )  // Peso Liquido
+Private cVolume:= 0 //TamSX3("F2_VOLUME1")[1]  // Volume
+Private cPesoB:= 0 //TamSX3("F2_PBRUTO")[1]    // Peso Bruto
+Private cPesoL:= 0 //TamSX3("F2_PLIQUI")[1]    // Peso Liquido
 
+SX3->(DBSETORDER(2))
+SX3->(DBSEEK("F2_PBRUTO"))
+cPicPeso := alltrim(X3Picture(SX3->X3_CAMPO))
+
+SX3->(DBSETORDER(2))
+SX3->(DBSEEK("F2_VOLUME1"))
+cPicVol := alltrim(X3Picture(SX3->X3_CAMPO))
 
 DEFINE MSDIALOG oDlg TITLE cTitulo  OF oMainWnd PIXEL FROM 040,040 TO 430,1200
 
@@ -1043,30 +1059,32 @@ DEFINE MSDIALOG oDlg TITLE cTitulo  OF oMainWnd PIXEL FROM 040,040 TO 430,1200
 @ 040, 009 SAY   oSay3    PROMPT "End.Trans.:"      SIZE 043, 007 PIXEL OF oDlg
 @ 038, 040 MSGET oEndTrans  VAR    cEndTrans       SIZE 080, 010 PIXEL OF oDlg When .F.
 
-@ 060, 009 SAY   oSay3    PROMPT "Placa"      SIZE 043, 007 PIXEL OF oDlg
-@ 058, 040 MSGET oPlaca  VAR    cPlaca       SIZE 080, 010 PIXEL OF oDlg When .T.
-@ 060, 150 SAY   oSay3    PROMPT "UF Veiculo :"      SIZE 043, 007 PIXEL OF oDlg
-@ 058, 180 MSGET oUFVei  VAR    cUFVei       SIZE 080, 010 PIXEL OF oDlg When .T.
+@ 060, 009 SAY   oSay3    PROMPT "Veiculo"      SIZE 043, 007 PIXEL OF oDlg
+@ 058, 040 MSGET oVeic  VAR    cVeic       SIZE 080, 010 PIXEL OF oDlg When .T.   F3 "DA3" VALID ValMotor( "DA3",cVeic )
+@ 060, 130 SAY   oSay3    PROMPT "Placa"      SIZE 043, 007 PIXEL OF oDlg
+@ 058, 155 MSGET oPlaca  VAR    cPlaca       SIZE 080, 010 PIXEL OF oDlg When .F.
+@ 060, 250 SAY   oSay3    PROMPT "UF Veiculo :"      SIZE 043, 007 PIXEL OF oDlg
+@ 058, 290 MSGET oUFVei  VAR    cUFVei       SIZE 080, 010 PIXEL OF oDlg When .F.
 
 @ 080, 009 SAY   oSay3    PROMPT "Motorista"      SIZE 043, 007 PIXEL OF oDlg
 @ 078, 040 MSGET oMotor   VAR    cMotor           SIZE 043, 010 PIXEL OF oDlg When .T.   F3 "DA4" VALID ValMotor( "DA4",cMotor )
 @ 078, 100 MSGET oNMMtor  VAR    cNMMotor         SIZE 080, 010 PIXEL OF oDlg When .F.
 @ 080, 220 SAY   oSay3    PROMPT "CPF Mot.:"      SIZE 043, 007 PIXEL OF oDlg
-@ 078, 250 MSGET oCPFMotor  VAR    cCPFMotor       SIZE 080, 010 PIXEL OF oDlg When .T.
+@ 078, 250 MSGET oCPFMotor  VAR    cCPFMotor       SIZE 080, 010 PIXEL OF oDlg When .F.
 @ 080, 350 SAY   oSay3    PROMPT "RG Mot.:"      SIZE 043, 007 PIXEL OF oDlg
-@ 078, 400 MSGET oRGMotor  VAR    cRGMotor       SIZE 080, 010 PIXEL OF oDlg When .T.
+@ 078, 400 MSGET oRGMotor  VAR    cRGMotor       SIZE 080, 010 PIXEL OF oDlg When .F.
 
 @ 110, 009 SAY   oSay3    PROMPT "Especie"      SIZE 043, 007 PIXEL OF oDlg
 @ 108, 040 MSGET oEspecie  VAR    cEspecie       SIZE 080, 010 PIXEL OF oDlg When .T.
 @ 110, 130 SAY   oSay3    PROMPT "Marca"      SIZE 043, 007 PIXEL OF oDlg
 @ 108, 155 MSGET oMarca  VAR    cMarca       SIZE 080, 010 PIXEL OF oDlg When .T.
 @ 110, 250 SAY   oSay3    PROMPT "Volume"      SIZE 043, 007 PIXEL OF oDlg
-@ 108, 290 MSGET oVolume  VAR    cVolume       SIZE 080, 010 PIXEL OF oDlg When .T.
+@ 108, 290 MSGET oVolume  VAR    cVolume       SIZE 080, 010 PIXEL OF oDlg When .T. PICTURE cPicVol
 
 @ 130, 009 SAY   oSay3    PROMPT "Peso Bruto"      SIZE 043, 007 PIXEL OF oDlg
-@ 128, 040 MSGET oPesoB  VAR    cPesoB       SIZE 080, 010 PIXEL OF oDlg When .T.
+@ 128, 040 MSGET oPesoB  VAR    cPesoB       SIZE 080, 010 PIXEL OF oDlg When .T. PICTURE cPicPeso
 @ 130, 130 SAY   oSay3    PROMPT "Peso Liquido"      SIZE 043, 007 PIXEL OF oDlg
-@ 128, 180 MSGET oPesoL  VAR    cPesoL       SIZE 080, 010 PIXEL OF oDlg When .T.
+@ 128, 180 MSGET oPesoL  VAR    cPesoL       SIZE 080, 010 PIXEL OF oDlg When .T. PICTURE cPicPeso
 
 @ 179, 531 BUTTON oButton1 PROMPT "Confirma"      SIZE 037, 012 OF oDlg ACTION (GravaMot(),oDlg:End()) PIXEL
 
@@ -1077,34 +1095,42 @@ Return
 //Rotina para gravar os dados na Tabela SF2
 //essas informações serão usadas na impressão da DANFE atraves do PE - PE01NFESEFAZ
 Static Function GravaMot
-
-//Local cMensDadTransp := ""
-
-//Local cCodTrans           // Código Transportadora (SA4)
-//Local cNomTrans           // Nome da Transportadora (SA4)
-//Local cCNPJTrans          // CNPJ da Transportadora (SA4)
-//Local cEndTrans           // Endereço da Transportadora (SA4)
-//Local cPlaca              // Placa veiculo
-//Local cUFVei              // Placa veiculo
-//Local cMotor              // Código do Motorista
-//Local cNmMotor            // Nome do Veículo
-//Local cCPFMotor           // CPF do Motorista
-//Local cRGMotor           // RG do Motorista
-//Local cEspecie           // Especie
-//Local cMarcap           // Marca
-//Local cVolume           // Volume
-//Local cPesoB           // Peso Bruto
-//Local cPesoL           // Peso Liquido
-
 /*
+cCodTrans           // Código Transportadora (SA4)
+cNomTrans           // Nome da Transportadora (SA4)
+cCNPJTrans          // CNPJ da Transportadora (SA4)
+cEndTrans           // Endereço da Transportadora (SA4)
 
-cMensDadTransp
+cVeic               //Codigo do Veiculo
+cPlaca              // Placa veiculo
+cUFVei              // UF veiculo
+
+cMotor              // Código do Motorista
+cNmMotor            // Nome do Veículo
+cCPFMotor           // CPF do Motorista
+cRGMotor            // RG do Motorista
+cEspecie            // Especie
+cMarca              // Marca
+cVolume             // Volume
+cPesoB              // Peso Bruto
+cPesoL              // Peso Liquido
+*/
+
+Local cCompl := ""
+
+cCompl := "Marca:"+alltrim(cMarca)+" Placa:" + alltrim(cPlaca) + " UF Veiculo:" + alltrim(cUFVei)
+cCompl += " Motorista:"+alltrim(cNmMotor) + " CNPJ/CPF:" + alltrim(cCPFMotor) + " RG:" + alltrim(cRGMotor)
 
 If RecLock("SF2",.F.)
-    SF2->F2_XDAD     := cMotor
-    SF2->()MsUnLock()
+    SF2->F2_TRANSP  := cCodTrans        //Transportadora
+    SF2->F2_VEICUL1 := cVeic            //Veiculo DA3
+    SF2->F2_ESPECI1 := cEspecie         //Especie 
+    SF2->F2_VOLUME1 := cVolume          //Volume
+    SF2->F2_PLIQUI  := cPesoL           //Peso Liquido
+    SF2->F2_PBRUTO  := cPesoB           //Peso Bruto
+    SF2->F2_MENN2   := If(Empty(ALLTRIM(F2_MENN2)),alltrim(cCompl) , ALLTRIM(F2_MENN2) +" "+ alltrim(cCompl)) //complemento - dados do Motorista - não tem campos na DANFE imprimir no complemento
+    SF2->(MsUnLock())
 EndIf
-*/
 
 Return
 
@@ -1128,8 +1154,18 @@ ElseIf _cAlias = "DA4" //Transportadora
     DbSetOrder(1)
     If DbSeek( xFILIAL("DA4") + _cCodigo )
         cNmMotor := DA4->DA4_NOME  // Nome do Motorista
+        cCPFMotor := DA4->DA4_CGC //CPF/ GNPJ
+        cRGMotor := ""//DA4->DA4_CGC
         lRet     := .T.
     Endif
+ElseIf _cAlias = "DA3" //Veiculo
+    DbSelectArea("DA3")
+    DbSetOrder(1)
+    If DbSeek( xFILIAL("DA3") + _cCodigo )
+        cPlaca := DA3->DA3_PLACA  // Placa do Veiculo
+        cUFVei := DA3->DA3_ESTPLA // UF da Placa
+        lRet     := .T.
+    Endi
 EndIf
 
 Return( lRet )
@@ -1172,4 +1208,4 @@ If mv_par04 == 2 //Somente para Nota de Saida
 EndIf
 
 RestArea(aArea)
-Return 
+Return
