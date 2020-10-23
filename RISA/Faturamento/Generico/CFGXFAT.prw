@@ -752,7 +752,7 @@ If !M->C5_XOPER $ GetMV('FS_OPERVEN',,"01/02/04")
     Return
 Endif
 
-If Type("l410Auto") == "U" .OR. l410Auto     // Ignora se não identificar a origem do cadastro ou se for um EXECAUTO
+If Type("l410Auto") == "U" .OR. l410Auto     //  Ignora se não identificar a origem do cadastro ou se for um EXECAUTO
     Return    
 Endif
 

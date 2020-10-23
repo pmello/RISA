@@ -18,14 +18,6 @@
 */
 User Function SD1140E()
 
-
-
-
-
-
-
-//                                            ^
-//                                            |
 /*Implemente o ponto de entrada antes da chamada do Bloco de Função do Gestão de Cereais....*/
 //*************************************************************************************************************************************
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -35,4 +27,7 @@ If ExistBlock("xSD1140E")
 	ExecBlock( "xSD1140E", .F., .F. )
 EndIf
 
-Return
+//Função para verificar sem tem regitro na SZ1 e apagar. Função dentro do fonte SF1100E.PRW
+U_DELSZ1()
+	
+Return()

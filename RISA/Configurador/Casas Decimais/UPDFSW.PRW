@@ -1,18 +1,18 @@
 #include "totvs.ch"
 #include "tbiconn.ch"
 #include "dbstruct.ch"
-//#include "tryexception.ch"
+#INCLUDE "Protheus.ch"
 #DEFINE _CRLF	Chr(13) + Chr(10)
 
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
-±±³Fun‡…o    ³ UPDFSW  ³Autor ³ FSW                   ³Data ³ 25.Jun.09³±±
+±±³Fun‡…o    ³ UPDFSW  ³Autor ³ TOTVS                 ³Data ³ 25.Jun.09³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
 ±±³Descri‡„o ³ Compatibilizador de tabelas e campos                    ³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Uso       ³ Bardella                                             ³±±
+±±³Uso       ³ TOTVS                                                   ³±±
 ±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
@@ -60,8 +60,7 @@ If ( lOpen := MyOpenSm0(.T.) )
 
 	SM0->(DbGoTop())
 	RpcSetType(3) 
-	//RpcSetEnv(SM0->M0_CODIGO, SM0->M0_CODFIL)
-	RpcSetEnv("99", "01")
+	RpcSetEnv(SM0->M0_CODIGO, SM0->M0_CODFIL) //"99","01"
 	lMsFinalAuto := .F.
 	
 	//-- Obtem a lista de Updates disponiveis para execucao:
@@ -107,6 +106,115 @@ If ( lOpen := MyOpenSm0(.T.) )
 	ACTIVATE MSDIALOG oDlgUpd CENTERED
 EndIf
 Return
+
+/*
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Funcao para quantidade                                               ³
+//ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+*/
+User Function FSW01Des()
+Local aRet := {}
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ ESTRUTURA DO ARRAY aRET:                                             ³
+//ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+//³ aRet[01] - (C) Nome da Function                                      ³
+//³ aRet[02] - (C) Descritivo do Update                                  ³
+//³ aRet[03] - (L) Situacao para determinar se o Update ja foi executado ³
+//³ aRet[04] - (C) Projeto Lógico                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AAdd( aRet, 'UPDFSW01')
+AAdd( aRet, 'Decimais QTDE' )
+AAdd( aRet, .F. )
+AAdd( aRet, 'GENESIS' )
+
+Return( aRet )
+
+/*
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Funcao para valor                                                    ³
+//ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+*/
+User Function FSW02Des()
+Local aRet := {}
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ ESTRUTURA DO ARRAY aRET:                                             ³
+//ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+//³ aRet[01] - (C) Nome da Function                                      ³
+//³ aRet[02] - (C) Descritivo do Update                                  ³
+//³ aRet[03] - (L) Situacao para determinar se o Update ja foi executado ³
+//³ aRet[04] - (C) Projeto Lógico                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+AAdd( aRet, 'UPDFSW02')
+AAdd( aRet, 'Decimais VALOR' )
+AAdd( aRet, .F. )
+AAdd( aRet, 'GENESIS' )
+
+Return( aRet )
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ UPDFSW01 ³Autor  ³ DLeme                 ³Data  ³ 20.Abr.12³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Atualizações Modal Aquaviario                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Projeto   ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³ Bardella                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+User Function UPDFSW01()
+Local aRet      := {{},{},{},{},{},{},{},{}}
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ ESTRUTURA DO ARRAY aRET:                                             ³
+//ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+//³ aRet[01] - Array com os dados SX2                                    ³
+//³ aRet[02] - Array com os dados SIX                                    ³
+//³ aRet[03] - Array com os dados SX3                                    ³
+//³ aRet[04] - Array com os dados SX5                                    ³
+//³ aRet[05] - Array com os dados SX7                                    ³
+//³ aRet[06] - Array com os dados SXA                                    ³
+//³ aRet[07] - Array com os dados SXB                                    ³
+//³ aRet[08] - Array com os dados SX6                                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+aRet[3] := TMSAtuSX3("campos_quant.ini",16,5) //arquivo com campos, tamanho padrão, decimal padrão)
+
+Return(aRet)
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ UPDFSW01 ³Autor  ³ DLeme                 ³Data  ³ 20.Abr.12³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Atualizações Modal Aquaviario                              ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Projeto   ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³ Bardella                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+User Function UPDFSW02()
+Local aRet      := {{},{},{},{},{},{},{},{}}
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ ESTRUTURA DO ARRAY aRET:                                             ³
+//ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´
+//³ aRet[03] - Array com os dados SX3                                    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+aRet[3] := TMSAtuSX3("campos_vunit.ini",16,8) //arquivo com campos, tamanho padrão, decimal padrão)
+
+Return(aRet)
 
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -265,7 +373,7 @@ Static Function GetListUpd()
 Local aList     := {}
 Local nAux      := 0
 
-For nAux := 1 To 99
+For nAux := 1 To 2
 	cUpdate := StrZero(nAux,2)
 	If FindFunction( 'U_FSW' + cUpdate + 'Des' )
 	
@@ -324,7 +432,6 @@ ACTIVATE MSDIALOG oDlgSM0 CENTERED
 
 Return( aEmpresas )
 
-
 //--------------------------------------------------------------------
 /*/{Protheus.doc} MyOpenSM0
 Função de processamento abertura do SM0 modo exclusivo
@@ -355,57 +462,111 @@ For nLoop := 1 To 20
 	EndIf
 	Sleep( 500 )
 Next nLoop
-/*
-If !lOpen
-	MsgStop( "Não foi possível a abertura da tabela " + ;
-	IIf( lShared, "de empresas (SM0).", "de empresas (SM0) de forma exclusiva." ), "ATENÇÃO" )
-EndIf
-*/
+
 Return lOpen
 
 /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
-±±³Fun‡…o    ³VerIndice ³ Autor ³FSW                    ³ Data ³26/01/2009³±±
+±±³Fun‡…o    ³TMSAtuSX3 ³ Autor ³ TOTVS      ³ Data ³ 20.Mar.11³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡…o ³Atualiza a ordem dos indices                                ³±±
+±±³Descri‡…o ³ Retorna os dados para atualizacao do SX3                   ³±±
 ±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
-User Function UPDIndex(aSIX)
-Local nTmp
-Local cOrdem
+Static Function TMSAtuSX3(cArq, nTam, nDec)
 
-cTab := ""
+Local aSX3      := {}
+Local aCpos,nI
+Local aArea := GetArea()
+Local nReg := 1
 
-// verifica se o indice ja existe no SIX
-SIX->(dBsetOrder(1))
-For nTmp := 1 to Len(aSIX)  
-	if cTab <> aSIX[nTmp,1]
-		cTab := aSIX[nTmp,1]
-		// localiza a ultima ordem
-		SIX->(dbSeek(cTab+"z",.T.))
-		SIX->(dbskip(-1))
-		If SIX->(!Eof()) .and. SIX->INDICE == cTab
-			cOrdem := SIX->ORDEM
-		Else
-			cOrdem := "0"
-		EndIf
-	Endif	
+Default nDecimais := nDec
+Default nTam := nTam
 
-	if ! Empty(aSIX[nTmp,9])
-		SIX->(dbSeek(cTab))
-		Do While SIX->(!Eof()) .And. SIX->INDICE == cTab
-			If Alltrim(SIX->NICKNAME) == Alltrim(aSIX[nTmp,9])
-				aSIX[nTmp,2] := SIX->ORDEM
-			Endif	
-			SIX->(dbskip())
-		EndDo
-		if Empty(aSIX[nTmp,2])
-			cOrdem 			:= Soma1(cOrdem)
-			aSIX[nTmp,2]	:= cOrdem
-		Endif	
-	Endif	
-Next
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³VERIFICA AS PROPRIEDADES DOS CAMPOS³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SX3")
+SX3->(DbSetOrder(2))
 
-Return Nil
+aCpos := {}
+
+nHandle := FT_FUse(cArq)
+
+If nHandle = -1
+	return
+endif
+
+// Posiciona na primeria linha
+FT_FGoTop()
+
+// Retorna o número de linhas do arquivo
+nLast := FT_FLastRec()
+//primeira linha (quantidade, casas)
+cLine  := FT_FReadLn()
+nDecimais := val(substr(cLine,at("|",cLine)+1,10))      
+nTam      := val(substr(cLine,1,at("|",cLine)-1))
+FT_FSKIP()
+
+While !FT_FEOF()
+	cLine  := FT_FReadLn()
+	aAdd(aCpos,cLine)		
+	// Pula para próxima linha
+	FT_FSKIP()
+End
+// Fecha o Arquivo
+
+FT_FUSE()
+
+DbSelectArea("SX3")
+DbSetOrder(2) //X3_CAMPO
+ProcRegua(nReg)
+For nI := 1 To Len(aCpos)
+
+		IncProc(" Campo "+ alltrim(aCpos[nI]) )
+		DbSeek(aCpos[nI])
+		cPicture := "@E " + Repl("9",Min(18,X3_TAMANHO+nDecimais-X3_DECIMAL)-nDecimais-1)+"."+Repl("9",nDecimais)
+
+		Aadd(aSX3,{X3_ARQUIVO,;		//Arquivo
+					X3_ORDEM,;		//Ordem
+					X3_CAMPO,;		//Campo
+					X3_TIPO,;		//Tipo
+					nTam,;          //Min(18,X3_TAMANHO+nDecimais-X3_DECIMAL),;                   //Tamanho
+					nDecimais,;		//Decimal                               
+					X3_TITULO,;		//Titulo
+					X3_TITSPA,;		//Titulo SPA
+					X3_TITENG,;		//Titulo ENG
+					X3_DESCRIC,;	//Descricao
+					X3_DESCSPA,;	//Descricao SPA
+					X3_DESCENG,;	//Descricao ENG
+					cPicture,;  	//Picture
+					X3_VALID,;					//VALID
+					X3_USADO,;	//USADO
+					X3_RELACAO,;				//RELACAO
+					X3_F3,;					//F3
+					X3_NIVEL,;						//NIVEL
+					X3_RESERV,;	//RESERV
+					X3_CHECK,;					//CHECK
+					X3_TRIGGER,;					//TRIGGER
+					X3_PROPRI,;					//PROPRI
+					X3_BROWSE,;					//BROWSE
+					X3_VISUAL,;					//VISUAL
+					X3_CONTEXT,;					//CONTEXT
+					X3_OBRIGAT,;					//OBRIGAT
+					X3_VLDUSER,;//VLDUSER
+					X3_CBOX,;	//CBOX
+					X3_CBOXSPA,;	//CBOX SPA
+					X3_CBOXENG,;	//CBOX ENG
+					X3_PICTVAR,;					//PICTVAR
+					X3_WHEN,;//WHEN
+					X3_INIBRW,;					//INIBRW
+					X3_GRPSXG,;					//SXG
+					X3_FOLDER,;					//FOLDER
+					X3_PYME})					//PYME
+
+		nReg++
+Next nI
+RestArea(aArea)
+			
+Return(aSX3)

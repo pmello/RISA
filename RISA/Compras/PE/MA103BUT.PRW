@@ -19,17 +19,6 @@ User Function MA103BUT()
 
 Local aRet := {}
 
-
-
-
-
-
-
-
-
-
-//                                            ^
-//                                            |
 /*Implemente o ponto de entrada antes da chamada do Bloco de Função do Gestão de Cereais....*/
 //*************************************************************************************************************************************
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -38,5 +27,8 @@ Local aRet := {}
 If ExistBlock("xMA103BUT")
 	aRet := ExecBlock("xMA103BUT", .F., .F., aRet)
 EndIf
+
+//Chama a função para manutenção na tabela de dados adicionais do CTe
+aadd(aRet,{"BUDGET",   {|| U_ManSZ1()},"Dados do CTe","Dados do CTe" })
 
 Return aRet
