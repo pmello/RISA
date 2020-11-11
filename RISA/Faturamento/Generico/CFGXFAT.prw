@@ -1,4 +1,3 @@
-#INCLUDE "TOTVS.CH"
 #INCLUDE "colors.ch"
 #INCLUDE "TBICONN.CH"
 
@@ -278,12 +277,15 @@ Return (lRet)
 
 User Function GatPromo()
 Local aArea    := GetArea()
-Local cRet     := "1"       // M->C6_XOFERTA 
+//Local cRet     := "1"       // M->C6_XOFERTA 
 Local lTemProm := .F.
 Local nPreco   := M->C6_PRCVEN
 Local nPosPreco:= aScan( aHeader, {|x| Alltrim(x[2]) == 'C6_PRCVEN'})
 Local nPosDescP:= aScan( aHeader, {|x| Alltrim(x[2]) == 'C6_DESCONT'})
 Local nPosDescV:= aScan( aHeader, {|x| Alltrim(x[2]) == 'C6_VALDESC'})
+Local nPosOfert:= aScan( aHeader, {|x| Alltrim(x[2]) == 'C6_XOFERTA'})
+Local cRet     := IIF(alltrim(aCols[n,nPosOfert])=="","1",aCols[n,nPosOfert])
+
 //Local nPosComis:= aScan( aHeader, {|x| Alltrim(x[2]) == 'C6_COMIS1'})
 
 If ! GetMV('FS_REGRATB',,.F.) .OR. l410Auto 
@@ -410,12 +412,22 @@ Endif
 Return( lRet )
 
 // Libera edição dos campos C6_PRCVEN, C6_VALOR, C6_DESCONT, C6_VALDESC, C6_COMIS1 se C6_XOFERTA for igual a 1 ou 3
-
-User Function Oferta()
+//1=Normal;2=Promocional;3=Acima do desconto  
+User Function Oferta(cCampo)
 Local lRet := .T.
 Local nPosXofer:= aScan( aHeader, {|x| Alltrim(x[2]) == 'C6_XOFERTA'})
+Local nPosOper := aScan( aHeader, {|x| Alltrim(x[2]) == 'C6_OPER'})
 
-    lRet := ( aCols[n][nPosXofer] == '1' .or. aCols[n][nPosXofer] == '3')
+lRet := ( aCols[n][nPosXofer] == '1' .or. aCols[n][nPosXofer] == '3')
+
+If ALLTRIM(cCampo) == "C6_PRCVEN"
+
+    //se a operação não estiver contida no parametro o campo fica aberto para digitação
+    If acols[n][nPosOper] $ GetMv("FS_OPERVEN")
+        lRet := .F.
+    Endif
+
+Endif
 
 Return( lRet)
 
@@ -495,9 +507,11 @@ If lRegra
         MsgStop("Falta preencher o campo de Tp.operacao","Campo obrigatorio")
         Return( Eval( bRetorno ) )
     ElseIf Empty( M->C6_TABELA )
-        If Empty( M->C5_VEND1 )
-            MsgStop("Falta preencher o campo de Vendedor","Campo obrigatorio")
-            Return( Eval( bRetorno ) )
+        If Alltrim(M->C5_XOPER) $ GetMV('FS_OPERVEN',,"01/02/04")
+            If Empty( M->C5_VEND1 )
+                MsgStop("Falta preencher o campo de Vendedor. Verifique o tipo de operação!","Campo obrigatorio")
+                Return( Eval( bRetorno ) )
+            EndIf
         Endif
     ElseIf Empty( M->C6_PRODUTO )
         If Empty( M->C5_VEND1 )
@@ -608,7 +622,7 @@ Local cSQL  := "@B1_COD IN ('')"
 Local cTab  := GetNextAlias()
 
 If !Empty(M->C5_TABELA) .AND. !Empty(M->C5_VEND1)
- 
+
     cQuery := "SELECT DA1.DA1_CODPRO "
     cQuery += " FROM " + RetSQLName("DA1") + " DA1 "
     cQuery += "       INNER JOIN " + RetSQLName("SB1") + " SB1 ON SB1.D_E_L_E_T_ <> '*' AND SB1.B1_COD = DA1.DA1_CODPRO "
@@ -616,6 +630,7 @@ If !Empty(M->C5_TABELA) .AND. !Empty(M->C5_VEND1)
     cQuery += "       AND SB1.B1_GRUPO >= SZC.ZC_GRPROD AND SB1.B1_GRUPO <= SZC.ZC_GRPRODA "
     cQuery += "       AND SZC.ZC_VEND = '" + M->C5_VEND1 + "' "
     cQuery += " WHERE DA1.D_E_L_E_T_ <> '*' AND DA1.DA1_CODTAB = '" + M->C5_TABELA + "' "
+    cQuery += " AND DA1.DA1_FILIAL = '"+xFilial("DA1")+"' "
 
     Memowrite('VerTab.SQL',cQuery)
     ChangeQuery(cQuery)
@@ -631,6 +646,20 @@ If !Empty(M->C5_TABELA) .AND. !Empty(M->C5_VEND1)
         (cTab )->( DbCloseArea() )
         cSQL := Substr(cSQL,1,len(cSQL)-1) + ")"
     Endif
+
+/*
+    dbSelectArea("DA1")
+    DA1->(dbGoTop())
+    DA1->(dbSetOrder(1))
+    DbSeek(xFilial("DA1")+M->C5_TABELA)
+    cSQL  := "@B1_COD IN ("
+    While !DA1->( Eof() ) .and. DA1->DA1_CODTAB == M->C5_TABELA
+        cSQL += "'" + AllTrim(DA1->DA1_CODPRO) + "',"
+        DA1->( DbSkip() )
+    EndDo
+    cSQL := Substr(cSQL,1,len(cSQL)-1) + ")"
+*/
+
 Else
     cSQL := "" 
 EndIf
@@ -641,7 +670,10 @@ Return cSQL
 
 User Function Feira() 
 Local lRet := .T.
+Local nPosPrd  := aScan( aHeader, {|x| x[2] == 'C6_PRODUTO'})
+Local i
 
+/*
 IF DA0->( FieldPos("DA0_XFEIRA") ) > 0 
     IF ! Empty( M->C5_TABELA)
         IF ! Empty( POSICIONE("DA0",1, xFilial("DA0") + M->C5_TABELA,"DA0_CONDPG") )
@@ -651,6 +683,20 @@ IF DA0->( FieldPos("DA0_XFEIRA") ) > 0
             Endif
         Endif
     Endif
+Endif
+*/
+
+//todas as condições de pagamento devem ser bloqueadas para alteração após a digitação da condição
+//motivo: cálculo do acréscimo do preço
+//obs.: não foi tratado o item deletado para evitar que o usuário delete a linha só para alterar 
+//      a condição de pagamento e depois voltar o delete com o valor errado
+
+If M->C5_TIPO == 'N' //executa essa trava somente para pedidos do tipo normal para compatibilização do GC - Gestão de cereais
+    For i:= 1 to len(acols) 
+        If !Empty(acols[1,nPosPrd]) //verifica se já foi digitado algum item 
+            lRet := .F.
+        Endif
+    Next
 Endif
 
 Return lRet
@@ -734,7 +780,10 @@ Return( nRet )
 User Function SC6Oper
 Local lRet := .T.
 
-lRet := ! GetMV('FS_REGRATB',,.F.)
+//retirado por Alex Rodrigues - 04/11/2020
+//se o campo estiver bloqueado não consegue dar enter para trazer a TES, farei o bloqueio via gatilho 
+//   para não deixar colocar o tipo de operação diferente que está no cabeçalho
+//lRet := ! GetMV('FS_REGRATB',,.F.)
 
 Return( lRet )
 
@@ -849,7 +898,7 @@ If Type("l410Auto") == "U" .OR. l410Auto
     Return(lRet)   
 Endif
 
-// Nao valida as regras se for uma EXCLUSAO
+// Nao valida as regras se for uma EXCLUSAO ..
 IF ! ALTERA .AND. ! INCLUI
     Return(lRet)   
 Endif
@@ -927,7 +976,8 @@ If       IsInCallStack("VEIXA018")      ;   // VEICULOS       - Função que não o
     .OR. IsInCallStack("AUT001EXCDOCS") ;   // P.E. Gestao de Cereais
     .OR. IsInCallStack("AUT004EXCDOCS") ;   // P.E. Gestao de Cereais
     .OR. IsInCallStack("AUT005EXCDOCS") ;   // P.E. Gestao de Cereais
-    .OR. IsInCallStack("MONTADOCSAIDA")     // P.E. Gestao de Cereais
+    .OR. IsInCallStack("MONTADOCSAIDA") ;    // P.E. Gestao de Cereais 
+    .OR. IsInCallStack("VEIXX001")
     lRet := .F.
 Endif
 
@@ -1209,3 +1259,102 @@ EndIf
 
 RestArea(aArea)
 Return
+
+// GatPrcVen - Calculo do preço de venda com acréscimo conforme condição de pagamento
+// Autor: Alex Rodrigues - 28/10/2020
+
+User Function GatPrcVen(cRet)
+
+Local aArea    := GetArea()
+Local nPosPreco:= aScan( aHeader, {|x| Alltrim(x[2]) == 'C6_PRUNIT'})
+//Local nPosPreco:= aScan( aHeader, {|x| Alltrim(x[2]) == 'C6_PRCVEN'})
+Local nPosDescP:= aScan( aHeader, {|x| Alltrim(x[2]) == 'C6_DESCONT'})
+//Local nPosDescV:= aScan( aHeader, {|x| Alltrim(x[2]) == 'C6_VALDESC'})
+Local nPosOfert:= aScan( aHeader, {|x| Alltrim(x[2]) == 'C6_XOFERTA'})
+Local nPosCodPr:= aScan( aHeader, {|x| Alltrim(x[2]) == 'C6_PRODUTO'})
+Local nPreco   := aCols[n,nPosPreco]
+Local nPrcTab  := 0
+Local nPrecoJ  := 0
+Local aFin     := {}
+Local dUltData := ddatabase
+Local cScan    := ""
+Local i        := 0
+Local nValDesc := 0
+Local aAreaDA1 := DA1->(GetArea())
+
+//cRet
+//1 ou Nulo - retorna preço de venda
+//2         - retorna o valor do desconto
+//3         - preço de tabela com acréscimo
+
+Default cRet := Nil
+
+
+If ! GetMV('FS_REGRATB',,.F.) .OR. l410Auto 
+    Return( nPreco )
+ENDIF
+
+//estava no gatilho antes assim
+//IIF(M->C6_XOFERTA=="2",SZD->ZD_VLRPROM,M->C6_PRCVEN)
+
+//Pega o preço promocional se tiver preço promocional
+If aCols[n,nPosOfert] == "2"
+    nPreco := SZD->ZD_VLRPROM
+Endif
+
+//Array com a condição de pagamento
+aFin := condicao(nPreco,M->C5_CONDPAG,0,DDATABASE) // retorno do array {vencimento, valor}
+
+IF Len(aFin) == 0 // se array está vazio é porque a condição de pagamento é do tipo específica
+
+    //***** Pode ser usado por % ou po 9 - valor ..
+
+    cScan := "1"
+    nDup:= 0
+    While ( !Empty(cScan) )
+
+    	If (FieldPos("C5_DATA"+cScan))>0
+            dUltData := &("M->C5_DATA"+cScan)
+            //Alert("condição de pagamento específica % ou valor -> "+DTOC(&("M->C5_DATA"+cScan)))
+        Else
+            cScan := ""
+        Endif
+
+        cScan := Soma1(cScan,1)
+
+    EndDo
+Else
+        For i:=1 to len(aFin)
+            dUltData := aFin[i,1] 
+            //Alert("Condição normal -> "+DTOC(aFin[i,1]))
+        Next
+ENDIF
+
+If nPreco > 0 
+
+    DbSelectArea("DA1")
+    DbSetOrder(1) //Filial+Tabela+Produto+IndLot+Item
+    DbSeek(xFilial("DA1")+M->C5_TABELA+aCols[n,nPosCodPr])
+
+    nPrcTab := DA1->DA1_PRCVEN
+
+    nJuros := int((dUltData-dDataBase)/30)
+    nPrecoJ := nPrcTab + (nPrcTab * nJuros / 100) //aplica acréscimo
+    nValDesc := (nPrecoJ*aCols[n,nPosDescP]/100)
+    nPreco := nPrecoJ - nValDesc //aplica desconto
+//Else
+//    MsgInfo("Produto sem preço")
+Endif
+
+RestArea(aArea)
+RestArea(aAreaDa1)
+
+If cRet == '2' //valor do desconto
+    nRet := nValDesc
+ElseIf cRet == '3'  // preço de tabela com acréscimo.
+    nRet := nPrecoJ
+Else
+    nRet := nPreco
+ENDIF
+
+Return (nRet)

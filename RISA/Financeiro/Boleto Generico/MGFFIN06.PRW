@@ -102,13 +102,15 @@ User Function MULTIBOL(lDanfe,lEmail,lTitulo)
 		nOpca		:= 0
 		lPerg		:= .f.
 
+		bValid := {|| Iif( Empty(mv_par19), (Alert("SubConta em Branco, favor preencher este campo Obrigatorio"), nOpca := 0), nOpca := 1) }
+
 		AADD(aSays,OemToAnsi( 'Rotina de Impressao de Boleto' ) ) 
 		
 		AADD(aButtons, { 5,.T.,{|| lPerg := Pergunte("MULTIBOL",.T. ) } } )
 		AADD(aButtons, { 1,.T.,{|| iif(lPerg,(nOpca:= 1, FechaBatch()),nOpca := 0) }} )
 		AADD(aButtons, { 2,.T.,{|| FechaBatch() }} )
 		
-		FormBatch( cCadastro, aSays, aButtons ,,,370)	
+		FormBatch( cCadastro, aSays, aButtons ,bValid,,370)	
 
 		If nOpca != 1
 			Return .f.
@@ -569,14 +571,18 @@ User Function RF01B062(xBanco,xAgencia,xConta,xSubCt, lEmail)
 		cmsg3													,; //[3] TEXTO 1
 		cmsg4													}  //[4] TEXTO 1
 
+		If !Empty(SEE->EE_CGC)
+			xCNPJ := "CNPJ: "+Subs(SEE->EE_CGC,1,2)+"."+Subs(SEE->EE_CGC,3,3)+"."+Subs(SEE->EE_CGC,6,3)+"/"+Subs(SEE->EE_CGC,9,4)+"-"+Subs(SEE->EE_CGC,13,2)
+		else
+			xCNPJ := "CNPJ: "+Subs(SM0->M0_CGC,1,2)+"."+Subs(SM0->M0_CGC,3,3)+"."+Subs(SM0->M0_CGC,6,3)+"/"+Subs(SM0->M0_CGC,9,4)+"-"+Subs(SM0->M0_CGC,13,2)
+		EndIf
+
 		aDadosEmp    := {	SM0->M0_NOMECOM															                 ,;	//	[1]	Nome da Empresa
 		SM0->M0_ENDCOB																             ,;	//	[2]	Endereço
 		AllTrim(SM0->M0_BAIRCOB)+", "+AllTrim(SM0->M0_CIDCOB)+", "+SM0->M0_ESTCOB                ,;	//	[3]	Complemento
 		"CEP: "+Subs(SM0->M0_CEPCOB,1,5)+"-"+Subs(SM0->M0_CEPCOB,6,3)			                 ,;	//	[4]	CEP
 		"PABX/FAX: "+SM0->M0_TEL													             ,;	//	[5]	Telefones
-		"CNPJ: "+Subs(SM0->M0_CGC,1,2)+"."+Subs(SM0->M0_CGC,3,3)+"."+				              ;	   //	[6]
-		Subs(SM0->M0_CGC,6,3)+"/"+Subs(SM0->M0_CGC,9,4)+"-"+					   	              ;	   //	[6]
-		Subs(SM0->M0_CGC,13,2)													              	 ,;	//	[6]	CGC
+		xCNPJ																	              	 ,;	//	[6]	CGC
 		"I.E.: "+Subs(SM0->M0_INSC,1,3)+"."+Subs(SM0->M0_INSC,4,3)+"."+			                  ;	//	[7]
 		Subs(SM0->M0_INSC,7,3)+"."+Subs(SM0->M0_INSC,10,3)							   }	        //	[7]	I.E
 
@@ -1010,7 +1016,7 @@ Static Function Ret_cBarra(cBanco,cAgencia,cConta,cDacCC,cCarteira,cNroDoc,nValo
 			   cNNumSDig := AllTrim(SE1->E1_NUMBCO)
 			Else
 			   //Nosso Numero sem digito
-			   cNNumSDig := AllTrim(cConvenio)+strzero(val(cSequencial),10)
+			   cNNumSDig := AllTrim(cConvenio)+strzero(val(cSequencial),10) //CAMPO E1_NUMBCO estava com 15 caracteres e foi necessario alterar para 17. Dia 05/11/2020 - emerson
 			EndIf
 			// Alterado por Jorge Neto - 16/06/2020 - Fim
 			//Nosso Numero com digito

@@ -20,7 +20,7 @@
 User Function UPDCER01()
 
 Local lUpdBrowse	:= .T.
-Local cCpoNoUpd		:= "ZCB_NUMCC/ZCB_NUMCV/ZCB_NUMCS"
+Local cCpoNoUpd		:= "ZCB_NUMCC/ZCB_NUMCV/ZCB_NUMCS/E1_GCCONTC/E1_GCCONTV/E1_GCCONTS/E1_GCCONTT/E2_GCCONTC/E2_GCCONTV/E2_GCCONTS/E2_GCCONTT"
 Local cCampo		:= PARAMIXB
 
 //旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�

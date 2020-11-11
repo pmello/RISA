@@ -96,7 +96,7 @@ Endif
 If aNota[4] == "1"	// Notas de Saida
 	//Verifica se é Nota de Veiculo SIGAVEI
 	VV0->(Dbgotop())
-	If VV0->(DbSeek(xFilial("VV0")+aNota[2]+aNota[1]))
+	If VV0->(DbSeek(xFilial("VV0")+aNota[2]+aNota[1])) //(4) - Filial + Número NF + série NF .
 		lVeic	 := .T.
 		cObsMNF	 := Alltrim( MSMM(VV0->VV0_OBSMNF,200) )
 	Endif
@@ -108,7 +108,7 @@ If aNota[4] == "1"	// Notas de Saida
 			
 	//		Tratativa para colocar os dados abaixo em Informações adicionais do Produto
 	//      e ser Impresso na DANFE, incluindo espaços na descrição para impressão da Danfe ficar colunado
-	// 		Deixamos com 35 pois a Variavél na Impressão da DANFE MAXITEMC está com 35
+	// 		Deixamos com 35 pois a Variavél na Impressão da DANFE MAXITEMC está com 35.
 			
 			If cGrpPrd $ cGrupo    
 				cCodM   := Posicione("VV1",2,xFilial("VV1")+aProd[I][4]	,"VV1_CODMAR")
@@ -207,7 +207,7 @@ Else	// Notas de Entrada
 		dbSelectArea("SF1")
 		SF1->(dbSetOrder(1))
 		SF1->(dbGoTop())
-		If SF1->(dbSeek(xFilial("SF2") + aNota[2] + aNota[1] + cCliFor + cLoja))
+		If SF1->(dbSeek(xFilial("SF1") + aNota[2] + aNota[1] + cCliFor + cLoja))
 		
 			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 			//³Posiciona no item do documento fiscal conforme array³
@@ -226,61 +226,85 @@ Else	// Notas de Entrada
 				Endif
 			Endif
 		Endif
-		If lVeic 
-			For I:= 1 to Len(aProd)
-				cGrpPrd := Posicione("SB1",1,xFilial("SB1")+aProd[I][2]	,"B1_GRUPO"	)
-				cItem   := Strzero(aProd[I][1],2)
-				
-		//		Tratativa para colocar os dados abaixo em Informações adicionais do Produto
-		//      e ser Impresso na DANFE, incluindo espaços na descrição para impressão da Danfe ficar colunado
-		// 		Deixamos com 35 pois a Variavél na Impressão da DANFE MAXITEMC está com 35
-				
-				If cGrpPrd $ cGrupo    
-					cCodM   := Posicione("VV1",2,xFilial("VV1")+aProd[I][4]	,"VV1_CODMAR")
-					cCodV   := Posicione("VV1",2,xFilial("VV1")+aProd[I][4]	,"VV1_MODVEI")
-					cMarca  := Posicione("VE1",1,xFilial("VE1")+cCodM		,"VE1_DESMAR")
+	else
 
-					cAux1 := "Marca: "	+ Alltrim(cMarca)		 
-					cAux2 := "Chassi: "	+ Alltrim(aProd[I][4])  
-					IF VV2->( DbSeek( xFilial("VV2") + cCodM + cCodV )) 
-						cAux3 := "Modelo: " 	+ Alltrim(VV2->VV2_DESMOD) 
-					ELSE
-						cAux3 := Space( MAXITEMC ) 
-					Endif
+    	cCliFor	:= SF1->F1_FORNECE
+    	cLoja	:= SF1->F1_LOJA   
 
-					cAux4 := "Serie No.: " + Alltrim(VV1->VV1_SERMOT) 
-					cAux5 := "Ano/Modelo: "+ Alltrim(Substr(VV1->VV1_FABMOD,1,4))+"/"+Alltrim(Substr(VV1->VV1_FABMOD,5,4))
-					cAux6 := "Motor No.: " + Alltrim(VV1->VV1_NUMMOT) 
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+		//³Garante posicionamento do documento de entrada³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+		dbSelectArea("SF1")
+		SF1->(dbSetOrder(1))
+		SF1->(dbGoTop()) //filial + Documento + serie + fornecedor + loja + tipo
+		If SF1->(dbSeek(xFilial("SF1") + aNota[2] + aNota[1] + cCliFor + cLoja))
+		
+			DbSelectArea("VVF")
+			DbSetOrder(6) // Numero NF + Serie NF + Codigo Fornecedor + Loja ..
+			VVF->(dbGoTop())
+			If VVF->(DbSeek(xFilial("VVF")+aNota[2]+aNota[1]+cCliFor+cLoja))
+				lVeic	 := .T.
+			Endif
 
-					aProd[i][ 4] := PadR( cAux1, MAXITEMC ) + PadR( cAux2, MAXITEMC )
-					aProd[i][25] := PadR( cAux3, MAXITEMC ) + PadR( cAux4, MAXITEMC ) + PadR( cAux5, MAXITEMC ) + PadR( cAux6, MAXITEMC )
+		Endif
 
-					// Mostra Obs do veiculo: 1=No complemento do produto, 2=Nas informações adicionais
-					If cMostra == "1"
-						If .not. Empty( cObsMNF )
-							aProd[i][25] += PadR( " ", MAXITEMC )
-							nIni := 1
-							nMax := Round( Len( cObsMNF ) / MAXITEMC, 0 )
-							For nParte := 1 to nMax
-								cAux7		 := Substr(cObsMNF, nIni , MAXITEMC )
-								aProd[i][25] += PadR( cAux7, MAXITEMC )
-								nIni		 += MAXITEMC
-							Next
-						Endif
-					Else
-						cMensCli += AllTrim( cAux1 ) + " " + ;
-									AllTrim( cAux2 ) + " " + ;
-									AllTrim( cAux3 ) + " " + ;
-									AllTrim( cAux4 ) + " " + ;
-									AllTrim( cAux5 ) + " " + ; 
-									AllTrim( cAux6 ) + " "
-					Endif
+	Endif
+
+	If lVeic 
+		For I:= 1 to Len(aProd)
+			cGrpPrd := Posicione("SB1",1,xFilial("SB1")+aProd[I][2]	,"B1_GRUPO"	)
+			cItem   := Strzero(aProd[I][1],2)
+			
+	//		Tratativa para colocar os dados abaixo em Informações adicionais do Produto
+	//      e ser Impresso na DANFE, incluindo espaços na descrição para impressão da Danfe ficar colunado
+	// 		Deixamos com 35 pois a Variavél na Impressão da DANFE MAXITEMC está com 35
+			
+			If cGrpPrd $ cGrupo    
+			
+				cCodM   := Posicione("VV1",2,xFilial("VV1")+aProd[I][4]	,"VV1_CODMAR")
+				cCodV   := Posicione("VV1",2,xFilial("VV1")+aProd[I][4]	,"VV1_MODVEI")
+				cMarca  := Posicione("VE1",1,xFilial("VE1")+cCodM		,"VE1_DESMAR")
+
+				cAux1 := "Marca: "	+ Alltrim(cMarca)		 
+				cAux2 := "Chassi: "	+ Alltrim(aProd[I][4])  
+				IF VV2->( DbSeek( xFilial("VV2") + cCodM + cCodV )) 
+					cAux3 := "Modelo: " 	+ Alltrim(VV2->VV2_DESMOD) 
+				ELSE
+					cAux3 := Space( MAXITEMC ) 
 				Endif
-			Next
-			If cMostra == "2"
-				If .not. Empty( cObsMNF )
-					cMensCli += cObsMNF
+
+				cAux4 := "Serie No.: " + Alltrim(VV1->VV1_SERMOT) 
+				cAux5 := "Ano/Modelo: "+ Alltrim(Substr(VV1->VV1_FABMOD,1,4))+"/"+Alltrim(Substr(VV1->VV1_FABMOD,5,4))
+				cAux6 := "Motor No.: " + Alltrim(VV1->VV1_NUMMOT) 
+
+				aProd[i][ 4] := PadR( cAux1, MAXITEMC ) + PadR( cAux2, MAXITEMC )
+				aProd[i][25] := PadR( cAux3, MAXITEMC ) + PadR( cAux4, MAXITEMC ) + PadR( cAux5, MAXITEMC ) + PadR( cAux6, MAXITEMC )
+
+				// Mostra Obs do veiculo: 1=No complemento do produto, 2=Nas informações adicionais
+				If cMostra == "1"
+					If .not. Empty( cObsMNF )
+						aProd[i][25] += PadR( " ", MAXITEMC )
+						nIni := 1
+						nMax := Round( Len( cObsMNF ) / MAXITEMC, 0 )
+						For nParte := 1 to nMax
+							cAux7		 := Substr(cObsMNF, nIni , MAXITEMC )
+							aProd[i][25] += PadR( cAux7, MAXITEMC )
+							nIni		 += MAXITEMC
+						Next
+					Endif
+				Else
+					cMensCli += AllTrim( cAux1 ) + " " + ;
+								AllTrim( cAux2 ) + " " + ;
+								AllTrim( cAux3 ) + " " + ;
+								AllTrim( cAux4 ) + " " + ;
+								AllTrim( cAux5 ) + " " + ; 
+								AllTrim( cAux6 ) + " "
 				Endif
+			Endif
+		Next
+		If cMostra == "2"
+			If .not. Empty( cObsMNF )
+				cMensCli += cObsMNF
 			Endif
 		Endif
 	Endif

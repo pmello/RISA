@@ -18,8 +18,7 @@
 */
 User Function REL044CPO()
 
-Local lRet      := .T.  
-Local nI		:= 0
+Local lRet      := .T.
 Local aArea     := GetArea()
 Local cCodFil   := ""
 Local cNomFil   := ""
@@ -32,107 +31,197 @@ Local cDetVFr   := ""
 Local cDetMoe   := ""
 Local cDetVDs   := ""
 Local cDetVTo   := ""
+Local nChrFil   := 13
+Local nChrPro   := 32
 
-//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//³Executa impressão, caso o Ct. Troca esteja efetivado³
-//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-If !EMPTY(ZEN->ZEN_NUMCC)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//³Identificação do simbolo da moeda³
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+dbSelectArea("ZEN")
+cDetSmb := IIF(ZEN->ZEN_MOEDA <= 1, "R$", "US$")
 
-    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-    //³Posiciona no registro referente aos insumos vinculados ao contrato de troca³
-    //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-    dbSelectArea("ZEO")
-    ZEO->(dbSetOrder(1))
-    ZEO->(dbGoTop())
-    If ZEO->(dbSeek(xFilial("ZEO") + ZEN->ZEN_NUM))
-        While ZEO->(!EOF()) .AND. ZEO->ZEO_FILIAL == xFilial("ZEO") .AND. ZEO->ZEO_NUM == ZEN->ZEN_NUM
-            
-            //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-            //³Posiciona no cadastro do produto vinculado ao item do contrato de troca³
-            //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-            dbSelectArea("SB1")
-            SB1->(dbSetOrder(1))
-            SB1->(dbGoTop())
-            SB1->(dbSeek(xFilial("SB1") + ZEO->ZEO_PRODUT))
-
-            //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-            //³Obtém descrição do produto³
-            //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-            cDesPro := ALLTRIM(ZEO->ZEO_PRODUT) + " - " + ALLTRIM(ZEO->ZEO_DESPRO)
-
-            //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-            //³Realiza composição das variaveis com informações dos insumos³
-            //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-            cCodFil += IIF(!EMPTY(cCodFil), cDetQbr, "") + ZEO->ZEO_FILFAT
-            cNomFil += IIF(!EMPTY(cNomFil), cDetQbr, "") + POSICIONE("SM0", 1, cEmpAnt + ZEO->ZEO_FILFAT, "M0_FILIAL")
-            cDetPrd += IIF(!EMPTY(cDetPrd), cDetQbr2, "") + cDesPro
-            cDetQtd += IIF(!EMPTY(cDetQtd), cDetQbr, "") + ALLTRIM(TRANSFORM(ZEO->ZEO_QUANT, PESQPICT("ZEO", "ZEO_QUANT")))
-            cDetUm  += IIF(!EMPTY(cDetUm) , cDetQbr, "") + ALLTRIM(ZEO->ZEO_UM)
-            cDetAco += IIF(!EMPTY(cDetAco), cDetQbr, "") + ""
-            cDetVUn += IIF(!EMPTY(cDetVUn), cDetQbr, "") + ALLTRIM(TRANSFORM(ZEO->ZEO_PRCVEN, PESQPICT("ZEO", "ZEO_PRCVEN")))
-            cDetVDs += IIF(!EMPTY(cDetVDs), cDetQbr, "") + ALLTRIM(TRANSFORM(ZEO->ZEO_VALDES, PESQPICT("ZEO", "ZEO_VALDES")))
-            cDetVFr += IIF(!EMPTY(cDetVFr), cDetQbr, "") + ALLTRIM(TRANSFORM(0, PESQPICT("ZEO", "ZEO_VALDES")))
-            cDetMoe += IIF(!EMPTY(cDetMoe), cDetQbr, "") + "$"
-            cDetVTo += IIF(!EMPTY(cDetVTo), cDetQbr, "") + ALLTRIM(TRANSFORM(ZEO->ZEO_TOTAL, PESQPICT("ZEO", "ZEO_TOTAL")))
-
-            //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-            //³Analisa descrição do produto para identificar o número de quebras por linha³
-            //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-            nPos := 1
-            nQbrLin  := 1
-            cDetQbr  := ""
-            cDetQbr2 := ""
-            While .T.
-                If EMPTY(SUBSTR(cDesPro, nPos, 32))
-                    exit
-                Else
-                nQbrLin++ 
-                nPos += 33
-                EndIf
-            End
-
-            //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-            //³Compõe variavel de controle de quebra³
-            //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-            For nI := 1 To nQbrLin
-                cDetQbr  += CRLF
-
-                If nQbrLin == 2
-                    cDetQbr2 += CRLF
-                Else
-                    cDetQbr2 += IIF(nI > 1, CRLF, "")
-                EndIf
-            Next nI
-            
-            //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-            //³Avança para o próximo registro³
-            //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-            ZEO->(dbSkip())
-        End
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//³Posiciona no registro referente aos insumos vinculados ao contrato de troca³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+dbSelectArea("ZEO")
+ZEO->(dbSetOrder(1))
+ZEO->(dbGoTop())
+If ZEO->(dbSeek(xFilial("ZEO") + ZEN->ZEN_NUM))
+    While ZEO->(!EOF()) .AND. ZEO->ZEO_FILIAL == xFilial("ZEO") .AND. ZEO->ZEO_NUM == ZEN->ZEN_NUM
+        
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        //³Posiciona no cadastro do produto vinculado ao item do contrato de troca³
+        //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        dbSelectArea("SB1")
+        SB1->(dbSetOrder(1))
+        SB1->(dbGoTop())
+        SB1->(dbSeek(xFilial("SB1") + ZEO->ZEO_PRODUT))
 
         //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-        //³Cria variaveis em memória³
+        //³Obtém descrição da filial³
         //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-        OLE_SetDocumentVat(oWord,"%cCodFil", cCodFil)
-        OLE_SetDocumentVat(oWord,"%cNomFil", cNomFil)
-        OLE_SetDocumentVat(oWord,"%cDetPrd", cDetPrd)
-        OLE_SetDocumentVat(oWord,"%cDetQtd", cDetQtd)
-        OLE_SetDocumentVat(oWord,"%cDetUm" , cDetUm)
-        OLE_SetDocumentVat(oWord,"%cDetAco", cDetAco)
-        OLE_SetDocumentVat(oWord,"%cDetVUn", cDetVUn)
-        OLE_SetDocumentVat(oWord,"%cDetVDs", cDetVDs)
-        OLE_SetDocumentVat(oWord,"%cDetVTo", cDetVTo)
-        OLE_SetDocumentVat(oWord,"%cDetMoe", cDetMoe)
-        OLE_SetDocumentVat(oWord,"%cDetVFr", cDetVFr)
-    EndIf
-Else
-    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-    //³Alerta o usuário e aborta impressão do Ct. Troca³
-    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-    Help(NIL, NIL, "Atenção", NIL, "O Ct. Troca selecionado para impressão não está efetivado.", 1, 0, NIL, NIL, NIL, NIL, NIL, {"Somente é possível realizar à impressão de contratos que já estejam efetivados."})
-    lRet := .F.
+        cDesFil := ALLTRIM(POSICIONE("SM0", 1, cEmpAnt + ZEO->ZEO_FILFAT, "M0_FILIAL"))
+        
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        //³Obtém descrição do produto³
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        cDesPro := ALLTRIM(ZEO->ZEO_PRODUT) + " - " + ALLTRIM(ZEO->ZEO_DESPRO)
+
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        //³Verifica quantidade de linhas para apresentação da descrição da filial e do produto³
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        nQtdFil := NUMLIN(cDesFil, nChrFil)
+        nQtdPro := NUMLIN(cDesPro, nChrPro)
+
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        //³Obtém o maior número de linhas necessário³
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        nQtdLin := MAX(nQtdFil, nQtdPro)
+
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        //³Compõe as quebras de linha conforme o tamanho de cada coluna³
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        cDetQbr := STRQBR(1, nQtdLin) 
+        cQbrFil := STRQBR(nQtdFil, nQtdLin) + CRLF
+        cQbrPro := STRQBR(nQtdPro, nQtdLin) + CRLF
+
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        //³Realiza composição das variaveis com informações dos insumos³
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        cCodFil += IIF(!EMPTY(cCodFil), cDetQbr, "") + ZEO->ZEO_FILFAT
+        cNomFil += IIF(!EMPTY(cNomFil), cQbrFil, "") + cDesFil
+        cDetPrd += IIF(!EMPTY(cDetPrd), cQbrPro, "") + cDesPro
+        cDetQtd += IIF(!EMPTY(cDetQtd), cDetQbr, "") + ALLTRIM(TRANSFORM(ZEO->ZEO_QUANT, PESQPICT("ZEO", "ZEO_QUANT")))
+        cDetUm  += IIF(!EMPTY(cDetUm) , cDetQbr, "") + ALLTRIM(ZEO->ZEO_UM)
+        cDetAco += IIF(!EMPTY(cDetAco), cDetQbr, "") + ""
+        cDetVUn += IIF(!EMPTY(cDetVUn), cDetQbr, "") + ALLTRIM(TRANSFORM(ZEO->ZEO_PRCVEN, PESQPICT("ZEO", "ZEO_PRCVEN")))
+        cDetVDs += IIF(!EMPTY(cDetVDs), cDetQbr, "") + ALLTRIM(TRANSFORM(ZEO->ZEO_VALDES, PESQPICT("ZEO", "ZEO_VALDES")))
+        cDetVFr += IIF(!EMPTY(cDetVFr), cDetQbr, "") + ALLTRIM(TRANSFORM(0, PESQPICT("ZEO", "ZEO_VALDES")))
+        cDetMoe += IIF(!EMPTY(cDetMoe), cDetQbr, "") + cDetSmb
+        cDetVTo += IIF(!EMPTY(cDetVTo), cDetQbr, "") + ALLTRIM(TRANSFORM(ZEO->ZEO_TOTAL, PESQPICT("ZEO", "ZEO_TOTAL")))
+
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        //³Avança para o próximo registro³
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        ZEO->(dbSkip())
+    End
+
+    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    //³Cria variaveis em memória³
+    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    OLE_SetDocumentVat(oWord,"%cCodFil", cCodFil)
+    OLE_SetDocumentVat(oWord,"%cNomFil", cNomFil)
+    OLE_SetDocumentVat(oWord,"%cDetPrd", cDetPrd)
+    OLE_SetDocumentVat(oWord,"%cDetQtd", cDetQtd)
+    OLE_SetDocumentVat(oWord,"%cDetUm" , cDetUm)
+    OLE_SetDocumentVat(oWord,"%cDetAco", cDetAco)
+    OLE_SetDocumentVat(oWord,"%cDetVUn", cDetVUn)
+    OLE_SetDocumentVat(oWord,"%cDetVDs", cDetVDs)
+    OLE_SetDocumentVat(oWord,"%cDetMoe", cDetMoe)
+    OLE_SetDocumentVat(oWord,"%cDetVTo", cDetVTo)
+    OLE_SetDocumentVat(oWord,"%cDetVFr", cDetVFr)
+    OLE_SetDocumentVat(oWord,"%cDetSmb", cDetSmb)
 EndIf
 
 RestArea(aArea)
 
 Return lRet
+
+
+
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ±±
+±±ºPrograma  ³NUMLIN    ºAutor  ³ Marcelo Joner      º Data ³  27/10/2020 º±±
+±±ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ±±
+±±ºDesc.     ³Função responsável por analisar os caracteres de uma string º±±
+±±º          ³e retornar o número de linhas necessárias para impressão    º±±
+±±º          ³considerando que à quebra será entres os espaços em branco. º±±
+±±ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ±±
+±±ºUso       ³ Gestão de Cereais                                          º±±
+±±ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+*/
+Static Function NUMLIN(cTexto, nTamLin)
+
+Local nI        := 0
+Local nPosSpc   := 0
+Local nLinhas   := 1
+Local cPosAtu   := ""
+Local cFracao   := ""
+
+Default cTexto  := ""
+Default nTamLin := 0
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//³Executa regras, caso tenha sido informado texto³
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+If !EMPTY(cTexto) .AND. nTamLin > 0
+
+    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    //³Analisa todos os caracteres da string repassada³
+    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    For nI := 1 To Len(cTexto)
+        cPosAtu := SUBSTR(cTexto, nI, 1)
+        
+        cFracao += cPosAtu
+        nPosSpc := IIF(cPosAtu == " ", nI, nPosSpc)
+        
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        //³Caso à string acumulada ultrapasse o tamanho da linha, considera quebra de linha³
+        //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+        If Len(cFracao) > nTamLin
+            nLinhas++
+            nI := nPosSpc
+            cFracao := ""
+        EndIf
+    Next nI
+
+    nLinhas++
+EndIf
+
+Return nLinhas
+
+
+
+
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ±±
+±±ºPrograma  ³STRQBR      ºAutor  ³ Marcelo Joner     º Data ³ 27/10/2020 º±±
+±±ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ±±
+±±ºDesc.     ³Função responsável pela composição de caracteres de quebra  º±±
+±±º          ³de linha, conforme os parâmetros repassados.                º±±
+±±ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ±±
+±±ºUso       ³ Gestão de Cereais                                          º±±
+±±ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+*/
+Static Function STRQBR(nTamLin, nQtdLin)
+
+Local cStrQbr   := CRLF
+
+Default nTamLin := 0
+Default nQtdLin := 0
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//³Executa regras, caso os parâmetros tenham sido informados³
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+If nTamLin > 0 .AND. nQtdLin > 0
+    
+    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    //³Executa regras, caso o tamanho de linhas atual, seja inferior à quantidade de linhas necessárias³
+    //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    If nTamLin < nQtdLin
+        cStrQbr += REPLICATE(CRLF, (nQtdLin - nTamLin))
+    EndIf
+EndIf
+
+Return cStrQbr

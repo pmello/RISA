@@ -113,25 +113,29 @@ Static Function R4305QRY()
 	EndIf
 	
 	cQuery := " SELECT DISTINCT DT5.DT5_FILORI, DT5.DT5_NUMSOL, DT5.DT5_DATSOL, DT5.DT5_HORSOL, DT5.DT5_SEQEND, DT5.DT5_CODOBS, " + CRLF
-	cQuery += " DT5.DT5_DDD, DT5.DT5_TEL, DT5.DT5_DATPRV, DT5.DT5_HORPRV, DT5.DT5_FILDOC, DT5.DT5_DOC, DT5.DT5_SERIE, " + CRLF
+	cQuery += " DT5.DT5_DDD, DT5.DT5_TEL, DT5.DT5_CODSOL, DT5.DT5_DATPRV, DT5.DT5_HORPRV, DT5.DT5_FILDOC, DT5.DT5_DOC, DT5.DT5_SERIE, " + CRLF
 	cQuery += " DUE.DUE_NOME, DUE.DUE_END, DUE.DUE_BAIRRO, DUE.DUE_MUN, DUE.DUE_EST, DUE.DUE_CEP, DUE.DUE_CGC, DUE.DUE_INSCR,  " + CRLF
 	cQuery += " DUE.DUE_CONTAT, DUE.DUE_PONREF, DUE.DUE_CDRSOL, DUE.DUE_CODCLI, DUE.DUE_LOJCLI, " + CRLF
-	cQuery += " DTR.DTR_FILORI, DTR.DTR_VIAGEM, DTR.DTR_CODVEI, DTR.DTR_CODRB1, DTR.DTR_CODRB2 " + CRLF
-	//cQuery += " DA4.DA4_NOME, " + CRLF
+	cQuery += " DTR.DTR_FILORI, DTR.DTR_VIAGEM, DTR.DTR_CODVEI, DTR.DTR_CODRB1, DTR.DTR_CODRB2, DTR.DTR_CODRB3, " + CRLF
+	cQuery += " DA4.DA4_NOME, DA4.DA4_RG, SC5.C5_FILIAL, SC5.C5_NUM, DF1.DF1_XCODRE " + CRLF
 	cQuery += "	FROM "
 	cQuery += 		RetSqlName("DT5") + " DT5 " +CRLF
-	cQuery += " INNER JOIN " + RetSqlName("DUE") + " DUE ON DUE.DUE_FILIAL = '' AND DUE.DUE_DDD = DT5.DT5_DDD " +CRLF
-	cQuery += "              AND DUE.DUE_TEL = DT5.DT5_TEL AND DUE.D_E_L_E_T_ = '' " +CRLF
-	cQuery += " INNER JOIN " + RetSqlName("DUD") + " DUD ON DUD.DUD_FILIAL = '' AND DUD.DUD_FILDOC = DT5.DT5_FILDOC " +CRLF
+	cQuery += " INNER JOIN " + RetSqlName("DUE") + " DUE ON DUE.DUE_FILIAL = '"+xFilial("DUE")+"'  AND DUE.DUE_CODSOL = DT5.DT5_CODSOL " +CRLF
+	cQuery += "              AND DUE.D_E_L_E_T_ = '' " +CRLF
+	cQuery += " INNER JOIN " + RetSqlName("DUD") + " DUD ON DUD.DUD_FILIAL = '"+xFilial("DUD")+"' AND DUD.DUD_FILDOC = DT5.DT5_FILDOC " +CRLF
 	cQuery += "                 AND DUD.DUD_DOC = DT5.DT5_DOC AND DUD.DUD_SERIE = DT5.DT5_SERIE AND DUD.D_E_L_E_T_ = '' " +CRLF
-	cQuery += " INNER JOIN "+RetSqlName("DTQ")+" DTQ ON DTQ.DTQ_FILIAL = '' AND DTQ.DTQ_FILORI = DUD.DUD_FILORI " +CRLF
+	cQuery += " LEFT OUTER JOIN "+RetSqlName("DTQ")+" DTQ ON DTQ.DTQ_FILIAL = '"+xFilial("DTQ")+"' AND DTQ.DTQ_FILORI = DUD.DUD_FILORI " +CRLF
 	cQuery += "                 AND DTQ.DTQ_VIAGEM = DUD.DUD_VIAGEM AND DTQ.D_E_L_E_T_ = '' " +CRLF
-	cQuery += " INNER JOIN "+RetSqlName("DTR")+" DTR ON DTR.DTR_FILIAL = '' AND DTR.DTR_FILORI = DUD.DUD_FILORI  " +CRLF
+	cQuery += " LEFT OUTER JOIN "+RetSqlName("DTR")+" DTR ON DTR.DTR_FILIAL = '"+xFilial("DTR")+"' AND DTR.DTR_FILORI = DUD.DUD_FILORI  " +CRLF
 	cQuery += "                 AND DTR.DTR_VIAGEM = DUD.DUD_VIAGEM AND DTR.D_E_L_E_T_ = '' " +CRLF
-	//cQuery += " INNER JOIN "+RetSqlName("DUP")+" DUP ON DUP.DUP_FILIAL = '" + xFilial("DUP") + "' AND DUP.DUP_FILORI = DUD.DUD_FILORI  " +CRLF
-	//cQuery += "                 AND DUP.DUP_VIAGEM = DUD.DUD_VIAGEM AND DUP.D_E_L_E_T_ = '' " +CRLF
-	//cQuery += " INNER JOIN "+RetSqlName("DA4")+" DA4 ON DA4.DA4_FILIAL = '" + xFilial("DA4") + "' AND  DA4.DA4_COD = DUP.DUP_CODMOT " +CRLF
-	//cQuery += "                 AND DA4.D_E_L_E_T_ = '' " +CRLF
+	cQuery += " LEFT OUTER JOIN "+RetSqlName("DUP")+" DUP ON DUP.DUP_FILIAL = '" + xFilial("DUP") + "' AND DUP.DUP_FILORI = DUD.DUD_FILORI  " +CRLF
+	cQuery += "                 AND DUP.DUP_VIAGEM = DUD.DUD_VIAGEM AND DUP.D_E_L_E_T_ = '' " +CRLF
+	cQuery += " LEFT OUTER JOIN "+RetSqlName("DA4")+" DA4 ON DA4.DA4_FILIAL = '" + xFilial("DA4") + "' AND  DA4.DA4_COD = DUP.DUP_CODMOT " +CRLF
+	cQuery += "                 AND DA4.D_E_L_E_T_ = '' " +CRLF
+	cQuery += " LEFT OUTER JOIN "+RetSqlName("DF1")+" DF1 ON DF1.DF1_FILIAL = '" + xFilial("DF1") + "' AND  DF1.DF1_FILDOC = DT5.DT5_FILDOC " +CRLF
+	cQuery += "                 AND  DF1.DF1_DOC = DT5.DT5_DOC AND  DF1.DF1_SERIE = DT5.DT5_SERIE   AND DF1.D_E_L_E_T_ = '' " +CRLF
+	cQuery += " LEFT OUTER JOIN "+RetSqlName("SC5")+" SC5 ON SC5.C5_FILIAL = '" + xFilial("SC5") + "' AND  SC5.C5_XCODRE = DF1.DF1_XCODRE " +CRLF
+	cQuery += "                 AND SC5.D_E_L_E_T_ = '' " +CRLF
 	cQuery += " WHERE DT5.D_E_L_E_T_ = ''   " +CRLF
 	cQuery += " AND DT5.DT5_FILORI = '"+cFilAnt+"' " +CRLF ////TBETWEEN '"+MV_PAR01+"' AND '"+MV_PAR02+"' " +CRLF
 	cQuery += " AND DT5.DT5_NUMSOL BETWEEN '"+MV_PAR01+"' AND '"+MV_PAR02+"' "+CRLF
@@ -173,7 +177,8 @@ Static Function R4305IMP()
 	\*******************************************************/
 	
 	Private oFatura
-	Private oBrush1 	:= TBrush():New( , CLR_GREEN)
+	//Private oBrush1 	:= TBrush():New( , CLR_GREEN)
+	Private oBrush1 	:= TBrush():New( , RGB(86,98,36),,)
 	Private oBrush2 	:= TBrush():New( , RGB(247,247,247),,)
 	Private oBrush3 	:= TBrush():New( , RGB(255,255,223),,)
 	Private oFont06  	:= TFont():New("Times New Roman",,06,,.F.,,,,,.F.,.F.)// 3
@@ -265,7 +270,7 @@ Return()
 Static Function R4305CAB()
 	
 	Local cStartPath := GetSrvProfString("Startpath","")
-	Local cLogo  	 := cStartPath + "FATURA01.JPG"  //	:= GetSrvProfString("Startpath","") + "FATURA01.JPG"
+	Local cLogo  	 := cStartPath + "risa.JPG"  //	:= GetSrvProfString("Startpath","") + "FATURA01.JPG"
 	Local cFilMa := cFilAnt //Filial Corrente
 	
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -417,8 +422,13 @@ Static Function R4305CAB()
 	oFatura:Say(0705,1445,":",oFont14N)
 	oFatura:Say(0705,1485,'('+ Alltrim(COLQRY->DT5_DDD)+')' + ' ' + COLQRY->DT5_TEL,oFont14)
 	
-	//oFatura:Say(0780,0030,"Referencia   ",oFont14N)
-	//oFatura:Say(0780,0310,COLQRY->DUE_PONREF,oFont14)
+	oFatura:Say(0780,0030,"Pedido nº",oFont14N)
+	oFatura:Say(0780,0270,":",oFont14N)
+	oFatura:Say(0780,0310,COLQRY->C5_FILIAL + ' ' + COLQRY->C5_NUM ,oFont14)
+
+	oFatura:Say(0780,1205,"Requisição Frete nº",oFont14N)
+	oFatura:Say(0780,1565,":",oFont14N)
+	oFatura:Say(0780,1605,COLQRY->DF1_XCODRE,oFont14)
 	
 Return
 
@@ -458,19 +468,7 @@ Static Function R4305COL()
 		ITEMQRY->(DbCloseArea())
 	EndIf
 	
-	// 2014-07-26 - MH
-	// Inclusão no relatórios dos itens da COLETA - Tabela SZL
-	SZL->(dbSetOrder(1))
-	If SZL->(MsSeek(xFilial("SZL") + cFilCol + cNumCol ))
-		cAliasSql := "SZL"
-		cAliasCpo := "ZL"
-		
-	cQuery := " SELECT " + cAliasCpo + "_FILIAL FILIAL, " + cAliasCpo + "_FILORI FILORI," + cAliasCpo + "_NUMSOL NUMSOL," + cAliasCpo + "_ITEM ITEM, " + CRLF
-	cQuery += 			   cAliasCpo + "_CODPRO CODPRO, " + cAliasCpo + "_CODEMB CODEMB," + cAliasCpo + "_QTDVOL QTDVOL," + cAliasCpo + "_PESO PESO, " + CRLF
-	cQuery += 			   cAliasCpo + "_PESOM3 PESOM3, " + cAliasCpo + "_VALMER VALMER, SB1.B1_DESC DESCRICAO, " + CRLF
-//	cQuery += 			   cAliasCpo + "_CLIDES CLIDES, " + cAliasCpo + "_LOJDES LOJDES, " + CRLF
-		
-	Else
+
 		cAliasSql := "DUM"
 		cAliasCpo := "DUM"
 		
@@ -478,20 +476,16 @@ Static Function R4305COL()
 	cQuery += 			   cAliasCpo + "_CODPRO CODPRO, " + cAliasCpo + "_CODEMB CODEMB," + cAliasCpo + "_QTDVOL QTDVOL," + cAliasCpo + "_PESO PESO, " + CRLF
 	cQuery += 			   cAliasCpo + "_PESOM3 PESOM3, " + cAliasCpo + "_VALMER VALMER, SB1.B1_DESC DESCRICAO, " + CRLF
 	
-	EndIf
+
 /*	
 	cQuery := " SELECT " + cAliasCpo + "_FILIAL FILIAL, " + cAliasCpo + "_FILORI FILORI," + cAliasCpo + "_NUMSOL NUMSOL," + cAliasCpo + "_ITEM ITEM, " + CRLF
 	cQuery += 			   cAliasCpo + "_CODPRO CODPRO, " + cAliasCpo + "_CODEMB CODEMB," + cAliasCpo + "_QTDVOL QTDVOL," + cAliasCpo + "_PESO PESO, " + CRLF
 	cQuery += 			   cAliasCpo + "_PESOM3 PESOM3, " + cAliasCpo + "_VALMER VALMER, SB1.B1_DESC DESCRICAO, " + CRLF
 	cQuery += 			   cAliasCpo + "_CLIDES CLIDES, " + cAliasCpo + "_LOJDES LOJDES, " + CRLF
 */	
-	If cAliasSql == "SZL"
-		cQuery +=  cAliasCpo + "_DC DC, " + CRLF
-		cQuery +=  cAliasCpo + "_CLIDES CLIDES, " + cAliasCpo + "_LOJDES LOJDES," + cAliasCpo + "_CDRDES CDRDES " + CRLF
-	Else
 		cQuery +=   " '' DC, " + CRLF
 		cQuery +=   " '' CLIDES, '' LOJDES, '' CDRDES " + CRLF
-	EndIf
+
 	
 	cQuery += "	FROM "
 	cQuery += 	  RetSqlName(cAliasSql) + " " + cAliasSql	+ CRLF
@@ -511,7 +505,7 @@ Static Function R4305COL()
 	
 	//|---------------------------------------------------------------------------------
 	
-	nLinha := 0750
+	nLinha := 0850
 	
 	//|-- DADOS DO VEICULO E MOTORISTA
 	oFatura :Fillrect( {nLinha,0020,nLinha+70,2410}, oBrush1, "-2")
@@ -526,23 +520,31 @@ Static Function R4305COL()
 		oFatura:Say(nLinha,0200, Transform(StrTran(DA3->DA3_PLACA,"-",""),"@R AAA-9999"),oFont14)
 	EndIf
 	
-	oFatura:Say(nLinha,0780,"Reboque 1",oFont14N) //,,RGB(255,255,255))
-	oFatura:Say(nLinha,1010,":",oFont14N)
+	oFatura:Say(nLinha,0470,"Reboque 1",oFont14N) //,,RGB(255,255,255))
+	oFatura:Say(nLinha,0700,":",oFont14N)
 	DA3->(dbSetOrder(1))
 	If DA3->(MsSeek(xFilial("DA3") + COLQRY->DTR_CODRB1 ))
-		oFatura:Say(nLinha,1050,Transform(StrTran(DA3->DA3_PLACA,"-",""),"@R AAA-9999"),oFont14)
+		oFatura:Say(nLinha,0740,Transform(StrTran(DA3->DA3_PLACA,"-",""),"@R AAA-9999"),oFont14)
 	Else
-		oFatura:Say(nLinha,1050,"----------",oFont14)
+		oFatura:Say(nLinha,0740,"----------",oFont14)
 	EndIf
 	
-	oFatura:Say(nLinha,1580,"Reboque 2",oFont14N) //,,RGB(255,255,255))
-	oFatura:Say(nLinha,1810,":",oFont14N)
+	oFatura:Say(nLinha,1190,"Reboque 2",oFont14N) //,,RGB(255,255,255))
+	oFatura:Say(nLinha,1420,":",oFont14N)
 	If DA3->(MsSeek(xFilial("DA3") + COLQRY->DTR_CODRB2 ))
-		oFatura:Say(nLinha,1850,Transform(StrTran(DA3->DA3_PLACA,"-",""),"@R AAA-9999"),oFont14)
+		oFatura:Say(nLinha,1460,Transform(StrTran(DA3->DA3_PLACA,"-",""),"@R AAA-9999"),oFont14)
 	Else
-		oFatura:Say(nLinha,1850,"----------",oFont14)
+		oFatura:Say(nLinha,1460,"----------",oFont14)
 	EndIf
-	
+
+	oFatura:Say(nLinha,1850,"Reboque 3",oFont14N) //,,RGB(255,255,255))
+	oFatura:Say(nLinha,2080,":",oFont14N)
+	If DA3->(MsSeek(xFilial("DA3") + COLQRY->DTR_CODRB3 ))
+		oFatura:Say(nLinha,2120,Transform(StrTran(DA3->DA3_PLACA,"-",""),"@R AAA-9999"),oFont14)
+	Else
+		oFatura:Say(nLinha,2120,"----------",oFont14)
+	EndIf	
+
 	nLinha += 80
 	
 	oFatura:Say(nLinha,0030,"Ordem de Rastreamento",oFont14N) //,,RGB(255,255,255))
@@ -627,7 +629,7 @@ Static Function R4305COL()
 		EndDo
 	EndIf
 	
-	oFatura :Fillrect( {1240,0020,1310,2410}, oBrush1, "-2")
+	/*oFatura :Fillrect( {1240,0020,1310,2410}, oBrush1, "-2")
 	oFatura:Say(1290,1025,"A J U D A N T E S",oFont18N,,RGB(255,255,255))
 	
 	nLinha	:= 1370
@@ -661,7 +663,7 @@ Static Function R4305COL()
 		oFatura:Say(nLinha,1135,":",oFont14N)
 		oFatura:Say(nLinha,1175,"----------",oFont14)
 	EndIf
-	
+	*/
 	nLinha := 1490  // 1540
 	
 	oFatura :Fillrect( {nLinha,0020,nLinha+70,2410}, oBrush1, "-2")
@@ -707,8 +709,8 @@ Static Function R4305COL()
 				cCdrDes := DUL->DUL_CDRDES
 			EndIf
 		Else
-			DUE->(dbSetOrder(1))  //DUE_FILIAL+DUE_DDD+DUE_TEL
-			If DUE->(MsSeek(xFilial("DUE") + AvKey(cDDD,"DUE_DDD") + AvKey(cTel,"DUE_TEL")))
+			DUE->(dbSetOrder(1))  //DUE_FILIAL+DUE_CODSOL
+			If DUE->(MsSeek(xFilial("DUE") + COLQRY->DT5_CODSOL))
 				cCdrDes := DUE->DUE_CDRSOL
 			EndIf
 		EndIf
@@ -816,7 +818,7 @@ Static Function R4305COL()
 	oFatura :Fillrect( {nLinha,0020,nLinha+40,2410 }, oBrush2, "-2")
 	oFatura :Line( nLinha+20,0020, nLinha+20, 2410, RGB(000,000,000), "-4")
 	
-	oFatura :Say(nLinha+80,1000,"@ Totvs Microsiga P11 2014 | Rápido 900",oFont10)
+	oFatura :Say(nLinha+80,1000,"@ Totvs Microsiga P12 2020 | Risa SA",oFont10)
 	
 Return
 
