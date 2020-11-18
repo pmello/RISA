@@ -39,7 +39,7 @@ User Function RTMSR02()
 	Local _aAreaDT5  := DT5->(GetArea()) //Coleta
 	Local _aAreaDUM  := DUM->(GetArea()) //Itens da Coleta
 	Local _aAreaDUD  := DUD->(GetArea()) //Movimento de Viagem
-	
+
 	Local lOk		 := .F.
 	Local lRet	     := .F.
 	Local cPerg      := "RTMR02" //"R943C001"
@@ -284,7 +284,7 @@ Static Function R4305CAB()
 		_cTime := Transform(Time(),"99:99:99")
 		_cTime := StrTran( _cTime , ":","" )
 		
-		oFatura	:= FWMSPrinter():New("COLETA-" + ALLTRIM(COLQRY->DT5_NUMSOL)+'_'+_cTime, IMP_PDF)
+		oFatura	:= FWMSPrinter():New("COLETA-" + ALLTRIM(COLQRY->DT5_NUMSOL)+'_'+_cTime, IMP_SPOOL)
 		
 		oFatura:SetResolution(78) //Tamanho estipulado para a Danfe
 		oFatura:SetPortrait()
@@ -459,6 +459,8 @@ Static Function R4305COL()
 	Local cTel	  := COLQRY->DT5_TEL
 	Local cSeqEnd := COLQRY->DT5_SEQEND
 	Local cFilR9  := ''
+	Local cRegDes    := ''
+	Local cEstDes	 := ''	
 	
 	// 2016-10-27 - MH
 	Local cCliDes := ""

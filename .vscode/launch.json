@@ -27,7 +27,12 @@
 			"args": [],
 			"label": "SIGA",
 			"description": ""
+		},
+		{
+			"args": [],
+			"label": "SIGACFG",
+			"description": ""
 		}
 	],
-	"lastProgramExecuted": "SIGAMDI"
+	"lastProgramExecuted": "SIGACFG"
 }

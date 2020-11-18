@@ -380,8 +380,8 @@ User Function DADOSAPRO()
 		                        sMoeda+" "+AllTrim(TRANSFORM((cAliasTRB)->RB_PRCVENT, "@E 999,999.99")),;
 		                        sMoeda+" "+AllTrim(TRANSFORM((cAliasTRB)->RB_PREMIN, "@E 999,999.99")),;
 		                        sMoeda+" "+AllTrim(TRANSFORM((cAliasTRB)->RB_PRCVEN, "@E 999,999.99")),;
-		                        sMoeda+" "+AllTrim(TRANSFORM((cAliasTRB)->RB_VALOR, "@E 999,999.99")),;
-		                        sMoeda+" "+AllTrim(TRANSFORM((cAliasTRB)->RB_VALDESC, "@E 999,999.99")),;
+		                        sMoeda+" "+AllTrim(TRANSFORM((cAliasTRB)->RB_VALOR, "@E 999,999,999.99")),;
+		                        sMoeda+" "+AllTrim(TRANSFORM((cAliasTRB)->RB_VALDESC, "@E 999,999,999.99")),;
 		                        STR((cAliasTRB)->RB_DESCONT)+"%",;
 		                        STR((cAliasTRB)->RB_MARGEMP)+"%",;
 		                        sMoeda+" "+AllTrim(TRANSFORM((cAliasTRB)->RB_MARGEMV, "@E 999,999.99")),;

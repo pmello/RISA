@@ -211,9 +211,22 @@ AADD(aDefZCB, {"ZCB_DTRANS"	, SA4->A4_NOME   , Nil})
 dbSelectArea("DA3")
 DA3->(dbSetOrder(1))
 DA3->(dbGoTop())
-DA3->(dbSeek(xFilial("DA3") + Z01->Z01_VEICUL))
-AADD(aDefZCB, {"ZCB_VEICUL"	, Z01->Z01_VEICUL, Nil})
-AADD(aDefZCB, {"ZCB_PLACA"	, Z01->Z01_PLCVEI, Nil})
+If DA3->(dbSeek(xFilial("DA3") + Z01->Z01_VEICUL))
+	AADD(aDefZCB, {"ZCB_VEICUL"	, Z01->Z01_VEICUL, Nil})
+	AADD(aDefZCB, {"ZCB_PLACA"	, Z01->Z01_PLCVEI, Nil})
+ 	
+ 	If !EMPTY(DA3->DA3_XRBQ1)
+		AADD(aDefZCB, {"ZCB_VCREB1"	, DA3->DA3_XRBQ1, Nil})
+	EndIf
+	
+	If !EMPTY(DA3->DA3_XRBQ2)
+		AADD(aDefZCB, {"ZCB_VCREB2"	, DA3->DA3_XRBQ2, Nil})
+	EndIf
+	
+	If !EMPTY(DA3->DA3_XRBQ3)
+		AADD(aDefZCB, {"ZCB_VCREB3"	, DA3->DA3_XRBQ3, Nil})
+	EndIf
+EndIf
 
 dbSelectArea("DUT")
 DUT->(dbSetOrder(1))

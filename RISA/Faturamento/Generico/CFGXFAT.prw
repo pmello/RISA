@@ -1,5 +1,6 @@
 #INCLUDE "colors.ch"
 #INCLUDE "TBICONN.CH"
+#INCLUDE "PROTHEUS.CH"
 
 /*/
 
@@ -977,7 +978,8 @@ If       IsInCallStack("VEIXA018")      ;   // VEICULOS       - Função que não o
     .OR. IsInCallStack("AUT004EXCDOCS") ;   // P.E. Gestao de Cereais
     .OR. IsInCallStack("AUT005EXCDOCS") ;   // P.E. Gestao de Cereais
     .OR. IsInCallStack("MONTADOCSAIDA") ;    // P.E. Gestao de Cereais 
-    .OR. IsInCallStack("VEIXX001")
+    .OR. IsInCallStack("VEIXX001") ;        // VEICULOS       - Função que não obriga o preenchimento de campos
+    .OR. IsInCallStack("U_IMPCTE01")        // Importação do CTE
     lRet := .F.
 Endif
 
@@ -1069,8 +1071,8 @@ User Function GRVMOTORIS()
 
 Local cTitulo   := "Dados do Transportador"
 
-Private cCodTrans   := Space( TamSX3("A4_COD")[1] )   // Código Transportadora (SA4)
-Private cNomTrans   := Space( TamSX3("A4_NOME")[1] )  // Nome da Transportadora (SA4)
+Private cCodTrans   := Space( TamSX3("A4_COD")[1] )   // Código Transportadora (SA4) //carregar conteudo do SC5 OU tabela Z01
+Private cNomTrans   := Space( TamSX3("A4_NOME")[1] )  // Nome da Transportadora (SA4) //pesquisar SA4 trazer o conteudo
 Private cCNPJTrans  := Space( TamSX3("A4_CGC")[1] )  // CNPJ da Transportadora (SA4)
 Private cEndTrans   := Space( TamSX3("A4_END")[1] )  // Endereço da Transportadora (SA4)
 
@@ -1089,6 +1091,50 @@ Private cMarca:= Space( TamSX3("DA4_NOME")[1] )  // Marca
 Private cVolume:= 0 //TamSX3("F2_VOLUME1")[1]  // Volume
 Private cPesoB:= 0 //TamSX3("F2_PBRUTO")[1]    // Peso Bruto
 Private cPesoL:= 0 //TamSX3("F2_PLIQUI")[1]    // Peso Liquido
+
+//Conforme orientação Joabe - Totvs - Pegar os dados do Z01 posicionado
+
+If IsInCallStack("U_AAGRA001")         // Pesagem Unica - Romaneio
+    
+    //alert('entrou: '+Z01->Z01_TRANSP+"- numero romaneio: "+Z01->Z01_NUM )
+
+    cCodTrans   := Z01->Z01_TRANSP          // Código Transportadora (SA4) //carregar conteudo do SC5 OU tabela Z01
+
+    DbSelectArea("SA4")
+    DbSetOrder(1)
+    If DbSeek( xFILIAL("SA4") + cCodTrans )
+        cNomTrans   := SA4->A4_NOME         // Nome da Transportadora (SA4) //pesquisar SA4 trazer o conteudo
+        cCNPJTrans  := SA4->A4_CGC          // CNPJ da Transportadora (SA4)
+        cEndTrans   := SA4->A4_END          // Endereço da Transportadora (SA4)
+    Endif
+
+    cVeic   := Z01->Z01_VEICUL                   // Veiculo
+
+    DbSelectArea("DA3")
+    DbSetOrder(1)
+    If DbSeek( xFILIAL("DA3") + cVeic )
+        cPlaca := DA3->DA3_PLACA            // Placa do Veiculo
+        cUFVei := DA3->DA3_ESTPLA           // UF da Placa
+    Endi
+
+    cMotor  := Z01->Z01_MOTORI                   // Código do Motorista
+
+    DbSelectArea("DA4")
+    DbSetOrder(1)
+    If DbSeek( xFILIAL("DA4") + cMotor )
+        cNmMotor := DA4->DA4_NOME           // Nome do Motorista
+        cCPFMotor := DA4->DA4_CGC           //CPF/ GNPJ
+        cRGMotor := ""                      //DA4->DA4_CGC
+    Endif
+
+//    cEspecie:= Space( TamSX3("F2_ESPECI1")[1] )  // Especie
+//    cMarca:= Space( TamSX3("DA4_NOME")[1] )  // Marca
+//    cVolume:= 0 //TamSX3("F2_VOLUME1")[1]  // Volume
+
+    cPesoB:= Z01->Z01_PBRUTO                 // Peso Bruto
+    cPesoL:= Z01->Z01_PBRUTO-Z01->Z01_PTARA  // Peso Liquido
+
+Endif
 
 SX3->(DBSETORDER(2))
 SX3->(DBSEEK("F2_PBRUTO"))
@@ -1281,6 +1327,7 @@ Local cScan    := ""
 Local i        := 0
 Local nValDesc := 0
 Local aAreaDA1 := DA1->(GetArea())
+Local nTaxa    := GetMV('FS_TAXAJUR',,"1")
 
 //cRet
 //1 ou Nulo - retorna preço de venda
@@ -1338,7 +1385,7 @@ If nPreco > 0
 
     nPrcTab := DA1->DA1_PRCVEN
 
-    nJuros := int((dUltData-dDataBase)/30)
+    nJuros := int((dUltData-dDataBase)/30) * nTaxa
     nPrecoJ := nPrcTab + (nPrcTab * nJuros / 100) //aplica acréscimo
     nValDesc := (nPrecoJ*aCols[n,nPosDescP]/100)
     nPreco := nPrecoJ - nValDesc //aplica desconto

@@ -1396,8 +1396,17 @@ If Type("oTransp:_Transporta")<>"U"
 	aTransp[01] := IIf(Type("oTransp:_Transporta:_xNome:TEXT")<>"U",NoChar(oTransp:_Transporta:_xNome:TEXT,lConverte),"")
 	//	aTransp[02] := IIF(Type("oTransp:_ModFrete:TEXT")<>"U",oTransp:_ModFrete:TEXT,"0")
 	aTransp[03] := IIf(Type("oTransp:_VeicTransp:_RNTC")=="U","",oTransp:_VeicTransp:_RNTC:TEXT)
-	aTransp[04] := IIf(Type("oTransp:_VeicTransp:_Placa:TEXT")<>"U",oTransp:_VeicTransp:_Placa:TEXT,"")
-	aTransp[05] := IIf(Type("oTransp:_VeicTransp:_UF:TEXT")<>"U",oTransp:_VeicTransp:_UF:TEXT,"")
+	//aTransp[04] := IIf(Type("oTransp:_VeicTransp:_Placa:TEXT")<>"U",oTransp:_VeicTransp:_Placa:TEXT,"")
+	If StrZero(Val(oIdent:_NNf:Text),9) = SF2->F2_DOC
+			aTransp[04] := Posicione("DA3",1,xFilial("DA3")+SF2->F2_VEICUL1,'DA3_PLACA')
+			aTransp[05] := Posicione("DA3",1,xFilial("DA3")+SF2->F2_VEICUL1,'DA3_ESTPLA')
+		Else
+			aTransp[04] := Posicione("SF1",1,xFilial("SF1")+StrZero(Val(oIdent:_NNf:Text),9)+SubStr(oIdent:_Serie:Text,1,3),'F1_PLACA')
+			aTransp[05] := Posicione("SF1",1,xFilial("SF1")+StrZero(Val(oIdent:_NNf:Text),9)+SubStr(oIdent:_Serie:Text,1,3),'F1_EST') 
+		
+	EndIF 
+	
+	//aTransp[05] := IIf(Type("oTransp:_VeicTransp:_UF:TEXT")<>"U",oTransp:_VeicTransp:_UF:TEXT,"")
 	If Type("oTransp:_Transporta:_CNPJ:TEXT")<>"U"
 		aTransp[06] := Transform(oTransp:_Transporta:_CNPJ:TEXT,"@r 99.999.999/9999-99")
 	ElseIf Type("oTransp:_Transporta:_CPF:TEXT")<>"U"
@@ -1409,8 +1418,16 @@ If Type("oTransp:_Transporta")<>"U"
 	aTransp[10] := IIf(Type("oTransp:_Transporta:_IE:TEXT")<>"U",oTransp:_Transporta:_IE:TEXT,"")
 ElseIf Type("oTransp:_VEICTRANSP")<>"U"
 	aTransp[03] := IIf(Type("oTransp:_VeicTransp:_RNTC")=="U","",oTransp:_VeicTransp:_RNTC:TEXT)
-	aTransp[04] := IIf(Type("oTransp:_VeicTransp:_Placa:TEXT")<>"U",oTransp:_VeicTransp:_Placa:TEXT,"")
-	aTransp[05] := IIf(Type("oTransp:_VeicTransp:_UF:TEXT")<>"U",oTransp:_VeicTransp:_UF:TEXT,"")
+	//aTransp[04] := IIf(Type("oTransp:_VeicTransp:_Placa:TEXT")<>"U",oTransp:_VeicTransp:_Placa:TEXT,"")
+	If StrZero(Val(oIdent:_NNf:Text),9) = SF2->F2_DOC
+			aTransp[04] := Posicione("DA3",1,xFilial("DA3")+SF2->F2_VEICUL1,'DA3_PLACA')
+			aTransp[05] := Posicione("DA3",1,xFilial("DA3")+SF2->F2_VEICUL1,'DA3_ESTPLA')
+		Else
+			aTransp[04] := Posicione("SF1",1,xFilial("SF1")+StrZero(Val(oIdent:_NNf:Text),9)+SubStr(oIdent:_Serie:Text,1,3),'F1_PLACA')
+			aTransp[05] := Posicione("SF1",1,xFilial("SF1")+StrZero(Val(oIdent:_NNf:Text),9)+SubStr(oIdent:_Serie:Text,1,3),'F1_EST') 
+		
+	EndIF 
+	//aTransp[05] := IIf(Type("oTransp:_VeicTransp:_UF:TEXT")<>"U",oTransp:_VeicTransp:_UF:TEXT,"")
 EndIf
 If Type("oTransp:_Vol")<>"U"
 	If ValType(oTransp:_Vol) == "A"

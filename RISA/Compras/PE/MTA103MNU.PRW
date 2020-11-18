@@ -19,16 +19,6 @@ User Function MTA103MNU()
 
 Local aArea	:= GetArea()
 
-
-
-
-
-
-
-
-
-//                                            ^
-//                                            |
 /*Implemente o ponto de entrada antes da chamada do Bloco de Função do Gestão de Cereais....*/
 //*************************************************************************************************************************************
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -38,6 +28,9 @@ If ExistBlock("xMTA103MNU")
 	ExecBlock("xMTA103MNU", .F., .F.)
 EndIf
 
+//Inclusão da rotina de romaneio em 11/11/2020
+aAdd(aRotina,{"Romaneio", "U_ROMAE1()", 0 , 2, 0, nil})
+
 RestArea(aArea)
 
-Return
+Return()
