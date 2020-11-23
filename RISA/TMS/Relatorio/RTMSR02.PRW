@@ -1,4 +1,4 @@
-#INCLUDE "PROTHEUS.CH"
+#INCLUDE "PROTHEUS.CH" 000
 #INCLUDE "TBICONN.CH"
 #INCLUDE "COLORS.CH"
 #INCLUDE "RPTDEF.CH"
@@ -8,27 +8,27 @@
 #DEFINE CRLF Chr(13)+Chr(10)
 
 /*
-�����������������������������������������������������������������������������
-�����������������������������������������������������������������������������
-�������������������������������������������������������������������������Ŀ��
-���Fun��o    � RTMSR02  � Autor � Fabio Costa        � Data � 08/07/2014  ���
-�������������������������������������������������������������������������Ĵ��
-���Descri��o � IMPRESSAO COLETA TMS    									   ��
-�������������������������������������������������������������������������Ĵ��
-���Sintaxe   � R943C001		                                         	  ���
-�������������������������������������������������������������������������Ĵ��
-��� Uso      � SIGATMS                                                    ���
-��������������������������������������������������������������������������ٱ�
-�����������������������������������������������������������������������������
-�����������������������������������������������������������������������������
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Função    ³ RTMSR02  ³ Autor ³ Fabio Costa        ³ Data ³ 08/07/2014  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ IMPRESSAO COLETA TMS    									   ±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ R943C001		                                         	  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ SIGATMS                                                    ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 
-//|DT5 - Solicita��o de Coleta
+//|DT5 - Solicitação de Coleta
 //|DT6 - Documento de Transporte
 //|DUD - Movimento de Viagem
 //|DUE - Cadastro de Solicitantes
-//|DUL - Endere�os Solicitantes
-//|DUM - Itens da Solicita��o de Coleta
+//|DUL - Endereços Solicitantes
+//|DUM - Itens da Solicitação de Coleta
 //|DTQ - Viagem de Coleta
 
 
@@ -47,12 +47,12 @@ User Function RTMSR02()
 	If !IsInCallStack( 'TMSA460' )
 		//AjustaSX1(cPerg)
 		
-		//����������������������������������������������������������������Ŀ
-		//� Verifica as perguntas selecionadas                             �
-		//�--------------------------------------------------------------- �
-		//� mv_par01	// Coleta Inicial                                  �
-		//� mv_par02	// Coleta Final    	                               �
-		//������������������������������������������������������������������
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Verifica as perguntas selecionadas                             ³
+		//³--------------------------------------------------------------- ³
+		//³ mv_par01	// Coleta Inicial                                  ³
+		//³ mv_par02	// Coleta Final    	                               ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 		
 		If Pergunte(cPerg,.T.)
 			lOk := .T.
@@ -67,13 +67,13 @@ User Function RTMSR02()
 	If !lOk
 		Return Nil
 	Else
-		Processa( {|lEnd|lRet := R4305QRY()}, "","Filtrando as Informa��es ...", .F. )
+		Processa( {|lEnd|lRet := R4305QRY()}, "","Filtrando as Informações ...", .F. )
 	EndIf
 	
 	If lRet
 		Processa( {|lEnd| R4305IMP()}, "","Imprimindo, Aguarde ...", .F. )
 	Else
-		Aviso("AVISO","N�o h� dados para impress�o!!!",{"Verifique"})
+		Aviso("AVISO","Não há dados para impressão!!!",{"Verifique"})
 	EndIf
 	
 	// FECHA AREA DE TRABALHO DAS QUERYS
@@ -88,17 +88,17 @@ User Function RTMSR02()
 Return
 
 /*/
-�������������������������������������������������������������������������������
-�������������������������������������������������������������������������������
-���������������������������������������������������������������������������Ŀ��
-���FUNCAO    � R4305QRY � AUTOR � Fabio Costa           � DATA � 28.05.13   ���
-���������������������������������������������������������������������������Ĵ��
-���DESCRICAO � Tela Sele��o do Arquivo                                      ���
-���������������������������������������������������������������������������Ĵ��
-��� USO      � 43-SIGATMS                                                   ���
-���������������������������������������������������������������������������Ĵ��
-�������������������������������������������������������������������������������
-�������������������������������������������������������������������������������
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³FUNCAO    ³ R4305QRY ³ AUTOR ³ Fabio Costa           ³ DATA ³ 28.05.13   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³DESCRICAO ³ Tela Seleção do Arquivo                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ USO      ³ 43-SIGATMS                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 
 Static Function R4305QRY()
@@ -150,30 +150,30 @@ Static Function R4305QRY()
 Return lQry
 
 /*/
-�������������������������������������������������������������������������������
-�������������������������������������������������������������������������������
-���������������������������������������������������������������������������Ŀ��
-���FUNCAO    � F43R004IMP � AUTOR � Fabio Costa         � DATA � 22.05.2013 ���
-���������������������������������������������������������������������������Ĵ��
-���DESCRICAO � Processamento                                                ���
-���������������������������������������������������������������������������Ĵ��
-��� USO      � 43-SIGATMS                                                   ���
-���������������������������������������������������������������������������Ĵ��
-������������������������������������������������������������������������������
-�������������������������������������������������������������������������������
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³FUNCAO    ³ F43R004IMP ³ AUTOR ³ Fabio Costa         ³ DATA ³ 22.05.2013 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³DESCRICAO ³ Processamento                                                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ USO      ³ 43-SIGATMS                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 
 Static Function R4305IMP()
 	
 	/*******************************************************\
-	Fontes disponivies no objeto de impress�o TFont
+	Fontes disponivies no objeto de impressão TFont
 	cFntName == "courier new"
 	cFntName == "arial"
 	cFntName == "arial black"
 	cFntName == "times new roman"
 	cFntName == "fw microsiga"
 	cFntName == "andale mono"
-	cFntName == "Courier New"  --> Fonte padr�o Courier New
+	cFntName == "Courier New"  --> Fonte padrão Courier New
 	\*******************************************************/
 	
 	Private oFatura
@@ -215,9 +215,9 @@ Static Function R4305IMP()
 	Private cBcoCob 	:= ''
 	Private lPreView
 	
-	//������������������������������������������������������������������������Ŀ
-	//�Quadro 1 IDENTIFICACAO DO EMITENTE                                      �
-	//��������������������������������������������������������������������������
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Quadro 1 IDENTIFICACAO DO EMITENTE                                      ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 	
 	DbSelectArea("COLQRY")
 	COLQRY->(DbGoTop())
@@ -228,7 +228,7 @@ Static Function R4305IMP()
 		
 		IncProc('COLETA: '+COLQRY->DT5_NUMSOL)
 		
-		R4305CAB()  //Cabe�alho da Coleta
+		R4305CAB()  //Cabeçalho da Coleta
 		R4305COL()  //Itens da Coleta
 		
 		DT5->(DbSetOrder(1))
@@ -243,9 +243,9 @@ Static Function R4305IMP()
 		
 	EndDo
 	
-	//������������������������������������������������������������������������Ŀ
-	//�Finaliza a Impress�o                                                    �
-	//��������������������������������������������������������������������������
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Finaliza a Impressão                                                    ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 	
 	If lPreview
 		oFatura:Preview()
@@ -254,17 +254,17 @@ Static Function R4305IMP()
 Return()
 
 /*/
-�������������������������������������������������������������������������������
-�������������������������������������������������������������������������������
-���������������������������������������������������������������������������Ŀ��
-���FUNCAO    �  R4305CAB   � AUTOR � Fabio Costa        � DATA � 22.05.2013 ���
-���������������������������������������������������������������������������Ĵ��
-���DESCRICAO � Processamento                                                ���
-���������������������������������������������������������������������������Ĵ��
-��� USO      � 43-SIGATMS                                                   ���
-���������������������������������������������������������������������������Ĵ��
-�������������������������������������������������������������������������������
-�������������������������������������������������������������������������������
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³FUNCAO    ³  R4305CAB   ³ AUTOR ³ Fabio Costa        ³ DATA ³ 22.05.2013 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³DESCRICAO ³ Processamento                                                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ USO      ³ 43-SIGATMS                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 
 Static Function R4305CAB()
@@ -273,9 +273,9 @@ Static Function R4305CAB()
 	Local cLogo  	 := cStartPath + "risa.JPG"  //	:= GetSrvProfString("Startpath","") + "FATURA01.JPG"
 	Local cFilMa := cFilAnt //Filial Corrente
 	
-	//������������������������������������������������������������������������Ŀ
-	//�Inicializacao do objeto grafico                                         �
-	//��������������������������������������������������������������������������
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Inicializacao do objeto grafico                                         ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 	
 	If oFatura == Nil
 		
@@ -295,15 +295,15 @@ Static Function R4305CAB()
 		
 	EndIf
 	
-	//������������������������������������������������������������������������Ŀ
-	//�Inicializacao da pagina do objeto grafico                               �
-	//��������������������������������������������������������������������������
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Inicializacao da pagina do objeto grafico                               ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 	
 	oFatura:StartPage()
 	
 	oFatura:SayBitmap(0000,0002,cLogo,0920,0190)
 	
-	oFatura:Say(0111,1975,"N� ",oFont22N)
+	oFatura:Say(0111,1975,"N° ",oFont22N)
 	oFatura:Say(0111,2085,COLQRY->DT5_NUMSOL,oFont22N)
 	
 	// DADOS DA FILIAL
@@ -318,12 +318,12 @@ Static Function R4305CAB()
 	//oFatura:Say(0080,0930,SM0->M0_ENDCOB+'-'+AllTrim(SM0->M0_BAIRCOB)+'-'+AllTrim(SM0->M0_CIDENT),oFont09N)
 	oFatura:Say(0080,0930,Rtrim(SM0->M0_ENDENT) + '-' + AllTrim(SM0->M0_BAIRENT) + '-' + Rtrim(SM0->M0_CIDENT),oFont09N)
 	oFatura:Say(0120,0930,"CEP " + Transform(SM0->M0_CEPENT,"@R 99999-999") + '- TEL: ' + SM0->M0_TEL + '- FAX: ' + SM0->M0_FAX,oFont09N)
-	oFatura:Say(0160,0930,"CNPJ N� " + Transform(SM0->M0_CGC,"@R 99.999.999/9999-99") + " -  I.ESTADUAL N� " + Alltrim(SM0->M0_INSC) + " - I.MUNICIPAL N� " + Alltrim(SM0->M0_INSCM),oFont09N)
+	oFatura:Say(0160,0930,"CNPJ N° " + Transform(SM0->M0_CGC,"@R 99.999.999/9999-99") + " -  I.ESTADUAL N° " + Alltrim(SM0->M0_INSC) + " - I.MUNICIPAL N° " + Alltrim(SM0->M0_INSCM),oFont09N)
 	
 	//EMISSAO
 	//------------------------------
 	//oFatura:Fillrect( {0310,0020,0380,0350}, oBrush2, "-2")
-	oFatura:Say(0234,1680,"Emiss�o:",oFont14N)
+	oFatura:Say(0234,1680,"Emissão:",oFont14N)
 	oFatura:Say(0234,1880,Substr(COLQRY->DT5_DATSOL,7,2)+'/'+Substr(COLQRY->DT5_DATSOL,5,2)+'/'+Substr(COLQRY->DT5_DATSOL,1,4),oFont14)
 	oFatura:Say(0234,2160,'Hora:',oFont14N)
 	oFatura:Say(0234,2290,Substr(COLQRY->DT5_HORSOL,1,2) + ':' + Substr(COLQRY->DT5_HORSOL,3,2),oFont14)
@@ -351,14 +351,14 @@ Static Function R4305CAB()
 	EndIf
 	oFatura:Say(0385,1485,cCgcCli,oFont14)
 	
-	// ENDERE�O DE COLETA
+	// ENDEREÇO DE COLETA
 	cEnd	:= COLQRY->DUE_END
 	cBairro := COLQRY->DUE_BAIRRO
 	cCep	:= COLQRY->DUE_CEP
 	cMun	:= COLQRY->DUE_MUN
 	cEst	:= COLQRY->DUE_EST
 	
-	//SEQUENCIA DE ENDERE�O
+	//SEQUENCIA DE ENDEREÇO
 	If !Empty(COLQRY->DT5_SEQEND)
 		
 		If Select("DULQRY") > 0
@@ -390,7 +390,7 @@ Static Function R4305CAB()
 		
 	EndIf
 	
-	oFatura:Say(0465,0030,"Endere�o     ",oFont14N)
+	oFatura:Say(0465,0030,"Endereço     ",oFont14N)
 	oFatura:Say(0465,0270,":",oFont14N)
 	oFatura:Say(0465,0310,cEnd,oFont14)
 	
@@ -422,28 +422,28 @@ Static Function R4305CAB()
 	oFatura:Say(0705,1445,":",oFont14N)
 	oFatura:Say(0705,1485,'('+ Alltrim(COLQRY->DT5_DDD)+')' + ' ' + COLQRY->DT5_TEL,oFont14)
 	
-	oFatura:Say(0780,0030,"Pedido n�",oFont14N)
+	oFatura:Say(0780,0030,"Pedido nº",oFont14N)
 	oFatura:Say(0780,0270,":",oFont14N)
 	oFatura:Say(0780,0310,COLQRY->C5_FILIAL + ' ' + COLQRY->C5_NUM ,oFont14)
 
-	oFatura:Say(0780,1205,"Requisi��o Frete n�",oFont14N)
+	oFatura:Say(0780,1205,"Requisição Frete nº",oFont14N)
 	oFatura:Say(0780,1565,":",oFont14N)
 	oFatura:Say(0780,1605,COLQRY->DF1_XCODRE,oFont14)
 	
 Return
 
 /*/
-�������������������������������������������������������������������������������
-�������������������������������������������������������������������������������
-���������������������������������������������������������������������������Ŀ��
-���FUNCAO    � 	R4305COL   � AUTOR � Fabio Costa        � DATA � 22.05.2013 ���
-���������������������������������������������������������������������������Ĵ��
-���DESCRICAO � Processamento                                                ���
-���������������������������������������������������������������������������Ĵ��
-��� USO      � 43-SIGATMS                                                   ���
-���������������������������������������������������������������������������Ĵ��
-�������������������������������������������������������������������������������
-�������������������������������������������������������������������������������
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³FUNCAO    ³ 	R4305COL   ³ AUTOR ³ Fabio Costa        ³ DATA ³ 22.05.2013 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³DESCRICAO ³ Processamento                                                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ USO      ³ 43-SIGATMS                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 
 Static Function R4305COL()
@@ -609,12 +609,12 @@ Static Function R4305COL()
 				De: Marcelo Abreu [mailto:marcelo.abreu@rapido900.com.br]
 				Enviada em: quarta-feira, 12 de agosto de 2015 18:18
 				Para: 'Vicente Lacerenza' <vicente.lacerenza@rapido900.com.br>
-				Assunto: alter�o imprime coleta
+				Assunto: alterão imprime coleta
 				
-				No relat�rio A4 (TMSA460 -> A��ES RELACIONADAS -> IMPRIMIR)
-				- Imediatamente abaixo de onde imprime o campo nome (�NOME:� + DA4_NOME) Imprimir tamb�m o campo RG (�RG:� + DA4_RG)
+				No relatório A4 (TMSA460 -> AÇÕES RELACIONADAS -> IMPRIMIR)
+				- Imediatamente abaixo de onde imprime o campo nome (‘NOME:’ + DA4_NOME) Imprimir também o campo RG (‘RG:’ + DA4_RG)
 				
-				- Alterar texto onde est� escrito ORDEM DE COLETA para ORDEM DE CARREGAMENTO
+				- Alterar texto onde está escrito ORDEM DE COLETA para ORDEM DE CARREGAMENTO
 				*/
 				nLinha += 60
 				oFatura:Say(nLinha,0030,"RG",oFont14N)
@@ -759,9 +759,9 @@ Static Function R4305COL()
 	
 	nLinha := 2260 // 2440
 	
-	//|-- PROGRAMA��O
+	//|-- PROGRAMAÇÃO
 	oFatura :Fillrect( {nLinha,0020,nLinha+70,2410}, oBrush1, "-2")
-	oFatura:Say(nLinha+50,1000,"P R O G R A M A � � O",oFont18N,,RGB(255,255,255))
+	oFatura:Say(nLinha+50,1000,"P R O G R A M A Ç Ã O",oFont18N,,RGB(255,255,255))
 	
 	oFatura:Say(nLinha+130,0030, "Data ",oFont14N)
 	oFatura:Say(nLinha+130,0250,":",oFont14N)
@@ -771,7 +771,7 @@ Static Function R4305COL()
 	//oFatura:Say(nLinha+130,1445,":",oFont14N)
 	//oFatura:Say(nLinha+130,1485, Substr(COLQRY->DT5_DATPRV,7,2)+'/'+Substr(COLQRY->DT5_DATPRV,5,2)+'/'+Substr(COLQRY->DT5_DATPRV,1,4),oFont14)
 	
-	oFatura:Say(nLinha+210,0030,"Hor�rio ",oFont14N)
+	oFatura:Say(nLinha+210,0030,"Horário ",oFont14N)
 	oFatura:Say(nLinha+210,0250,":",oFont14N)
 	oFatura:Say(nLinha+210,0290,Substr(COLQRY->DT5_HORPRV,1,2)+':'+Substr(COLQRY->DT5_HORPRV,3,2),oFont14)
 	
@@ -789,7 +789,7 @@ Static Function R4305COL()
 	*/
 	/*Z01->( DbSetOrder(1) )//Z01_FILIAL, Z01_CDEMPR, Z01_FILTM6, R_E_C_N_O_, D_E_L_E_T_
 	If Z01->(DbSeek( xFilial("Z01") + cEmpAnt + DTR->DTR_FILORI ))
-		cFilR9 := Z01->Z01_CDFR90    // FILIAL PADRAO WEB - CARACTERE DE 3 POSI��ES.
+		cFilR9 := Z01->Z01_CDFR90    // FILIAL PADRAO WEB - CARACTERE DE 3 POSIÇÕES.
 	Endif
 	*/
 	oFatura:Say(nLinha+290,0030,"Viagem ",oFont14N)
@@ -808,7 +808,7 @@ Static Function R4305COL()
 	nLinha += 80
 	oFatura :Say(nLinha,0030,"PREZADO CLIENTE: PARA PODERMOS MELHORAR NOSSO ATENDIMENTO SOLICITAMOS QUE SEJA ANOTADO OS HORARIOS ABAIXO:",oFont12N)
 	nLinha += 50
-	oFatura :Say(nLinha+20,0030,"Chegada:_________   Sa�da:_________ ",oFont12N)
+	oFatura :Say(nLinha+20,0030,"Chegada:_________   Saída:_________ ",oFont12N)
 	oFatura :Say(nLinha+20,0730,"Local/Data: __________________________  Carimbo/Assinatura: _____________________________ ",oFont12N)
 	
 	// PREZADO CLIENTE: PARA PODERMOS MELHORAR NOSSO ATENDIMENTO SOLICITAMOS QUE SEJA ANOTADO OS HORARIOS ABAIXO:
@@ -825,17 +825,17 @@ Static Function R4305COL()
 Return
 
 /*/
-�������������������������������������������������������������������������������
-�������������������������������������������������������������������������������
-���������������������������������������������������������������������������Ŀ��
-���FUNCAO    � R4304MSG   � AUTOR � Marcos Holando      � DATA � 22.05.2013 ���
-���������������������������������������������������������������������������Ĵ��
-���DESCRICAO � Processamento                                                ���
-���������������������������������������������������������������������������Ĵ��
-��� USO      � 43-SIGATMS                                                   ���
-���������������������������������������������������������������������������Ĵ��
-�������������������������������������������������������������������������������
-�������������������������������������������������������������������������������
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³FUNCAO    ³ R4304MSG   ³ AUTOR ³ Marcos Holando      ³ DATA ³ 22.05.2013 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³DESCRICAO ³ Processamento                                                ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ USO      ³ 43-SIGATMS                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 
 Static Function R4304MSG(nLinha)
@@ -846,7 +846,7 @@ Static Function R4304MSG(nLinha)
 	oFatura :Fillrect( {nLinha,0020,nLinha+40,2410 }, oBrush2, "-2")
 	oFatura :Line( nLinha+18,0020, nLinha+18, 2410, RGB(000,000,000), "-4")
 	
-	oFatura :Say(nLinha+80,0030,"OBSERVA��ES : ",oFont14N)
+	oFatura :Say(nLinha+80,0030,"OBSERVAÇÕES : ",oFont14N)
 	
 	nLinha += 80
 	
@@ -862,17 +862,17 @@ Static Function R4304MSG(nLinha)
 Return
 
 /*/
-�������������������������������������������������������������������������������
-�������������������������������������������������������������������������������
-���������������������������������������������������������������������������Ŀ��
-���FUNCAO    � AJUSTASX1  � AUTOR � Marcos Holando      � DATA � 22.05.2013 ���
-���������������������������������������������������������������������������Ĵ��
-���DESCRICAO � Manuten�acao das perguntas do relatorio                                                   ���
-���������������������������������������������������������������������������Ĵ��
-��� USO      � 43-SIGATMS                                                   ���
-���������������������������������������������������������������������������Ĵ��
-�������������������������������������������������������������������������������
-�������������������������������������������������������������������������������
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³FUNCAO    ³ AJUSTASX1  ³ AUTOR ³ Marcos Holando      ³ DATA ³ 22.05.2013 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³DESCRICAO ³ Manutençacao das perguntas do relatorio                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ USO      ³ 43-SIGATMS                                                   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 
 Static Function AjustaSX1(cPerg)
